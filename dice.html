@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dice Roll – Lucky 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050508;--green:#00ff88;--purple:#b44fff;--blue:#00c8ff;--red:#ff4466;--gold:#ffd700;--text:#e8eaf0;--muted:#7a7d8e;--border:rgba(255,255,255,0.08);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(0,255,136,0.06) 0%,transparent 60%);pointer-events:none;}
+.topbar{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(5,5,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.back-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}
+.page-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--green);}
+.balance-chip{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:20px;padding:6px 14px;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--green);}
+
+.game-body{display:flex;flex-direction:column;align-items:center;padding:30px 20px;width:100%;gap:24px;}
+
+/* DICE */
+.dice-area{display:flex;gap:20px;align-items:center;}
+.dice{width:90px;height:90px;background:rgba(255,255,255,0.07);border:2px solid var(--border);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:56px;transition:transform .1s;box-shadow:0 0 20px rgba(0,255,136,0.1);}
+.dice.rolling{animation:roll 0.1s linear infinite;}
+@keyframes roll{0%{transform:rotateY(0)}25%{transform:rotateY(90deg)}50%{transform:rotateY(180deg)}75%{transform:rotateY(270deg)}100%{transform:rotateY(360deg)}}
+
+/* PREDICT */
+.predict-section{width:100%;max-width:340px;}
+.predict-label{font-size:13px;color:var(--muted);text-align:center;margin-bottom:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.predict-btns{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+.p-btn{border:1px solid var(--border);border-radius:10px;padding:12px 0;background:rgba(255,255,255,0.04);font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;color:var(--text);}
+.p-btn.selected{background:linear-gradient(135deg,rgba(0,255,136,0.2),rgba(0,200,255,0.1));border-color:var(--green);color:var(--green);box-shadow:0 0 10px rgba(0,255,136,0.2);}
+.p-btn:active{transform:scale(0.92);}
+
+/* BET + ROLL */
+.action-row{display:flex;gap:10px;align-items:center;}
+.bet-input{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;width:90px;outline:none;text-align:center;}
+.bet-input:focus{border-color:var(--green);}
+.roll-btn{border:none;border-radius:14px;padding:12px 28px;background:linear-gradient(90deg,#006644,var(--green));font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;color:#000;cursor:pointer;letter-spacing:1px;transition:.2s;}
+.roll-btn:disabled{opacity:0.4;pointer-events:none;}
+.roll-btn:active{transform:scale(0.95);}
+
+/* RESULT */
+.result-box{width:90%;max-width:320px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:18px;padding:18px;text-align:center;}
+.result-emoji{font-size:40px;}
+.result-msg{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;margin:8px 0;}
+.result-detail{font-size:13px;color:var(--muted);}
+
+/* ODDS INFO */
+.odds-info{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:12px 18px;width:90%;max-width:320px;}
+.odds-title{font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;}
+.odds-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
+
+/* HISTORY */
+.hist-row{display:flex;gap:6px;overflow-x:auto;width:90%;max-width:320px;padding-bottom:16px;scrollbar-width:none;}
+.hist-row::-webkit-scrollbar{display:none;}
+.hc{border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;font-family:'Orbitron',sans-serif;flex-shrink:0;}
+.hc-w{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+.hc-l{background:rgba(255,68,102,0.12);color:var(--red);border:1px solid rgba(255,68,102,0.2);}
+
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(10,10,20,0.95);border:1px solid var(--border);border-radius:14px;padding:10px 20px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;z-index:400;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{border-color:var(--green);color:var(--green);}
+.toast.lose{border-color:var(--red);color:var(--red);}
+
+@keyframes winBounce{0%{transform:scale(0.9)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+.win-anim{animation:winBounce .4s ease;}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="back-btn" onclick="location.href='index.html'">←</div>
+  <div class="page-title">🎲 Dice Roll</div>
+  <div class="balance-chip" id="balChip">🪙 0</div>
+</header>
+
+<div class="game-body">
+  <div class="dice-area">
+    <div class="dice" id="dice1">⚀</div>
+    <div style="font-family:'Orbitron',sans-serif;font-size:14px;color:var(--muted)">VS</div>
+    <div class="dice" id="dice2">⚀</div>
+  </div>
+
+  <div class="predict-section">
+    <div class="predict-label">Predict the result (1–6)</div>
+    <div class="predict-btns" id="predictBtns">
+      <button class="p-btn" onclick="selectPred(1)">1</button>
+      <button class="p-btn" onclick="selectPred(2)">2</button>
+      <button class="p-btn" onclick="selectPred(3)">3</button>
+      <button class="p-btn" onclick="selectPred(4)">4</button>
+      <button class="p-btn" onclick="selectPred(5)">5</button>
+      <button class="p-btn" onclick="selectPred(6)">6</button>
+    </div>
+  </div>
+
+  <div class="action-row">
+    <span style="color:var(--muted);font-size:14px;font-weight:600;">Bet:</span>
+    <input type="number" class="bet-input" id="betAmt" value="10" min="1">
+    <button class="roll-btn" id="rollBtn" onclick="rollDice()">ROLL!</button>
+  </div>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-emoji">🎲</div>
+    <div class="result-msg" style="color:var(--muted)">Pick a number & roll</div>
+    <div class="result-detail">Match the dice = 5x payout!</div>
+  </div>
+
+  <div class="odds-info">
+    <div class="odds-title">Payout Chart</div>
+    <div class="odds-row"><span>Exact match</span><span style="color:var(--gold)">5x your bet</span></div>
+    <div class="odds-row"><span>Miss</span><span style="color:var(--red)">Lose bet</span></div>
+    <div class="odds-row"><span>Chance</span><span style="color:var(--muted)">1 in 6 (16.7%)</span></div>
+  </div>
+
+  <div class="hist-row" id="histRow"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const diceFaces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+let selected = null;
+let balance = parseInt(localStorage.getItem('l7_balance')||'0');
+function updateBal(){ localStorage.setItem('l7_balance',balance); document.getElementById('balChip').textContent='🪙 '+balance; }
+updateBal();
+
+function selectPred(n){
+  selected=n;
+  document.querySelectorAll('.p-btn').forEach((b,i)=>b.classList.toggle('selected',i===n-1));
+}
+
+function rollDice(){
+  if(selected===null){ showToast('Pick a number first!','lose'); return; }
+  const bet = parseInt(document.getElementById('betAmt').value)||10;
+  if(bet<1||bet>balance){ showToast('Not enough coins!','lose'); return; }
+  balance-=bet; updateBal();
+  document.getElementById('rollBtn').disabled=true;
+
+  const d1=document.getElementById('dice1'), d2=document.getElementById('dice2');
+  d1.classList.add('rolling'); d2.classList.add('rolling');
+
+  let ticks=0;
+  const inter=setInterval(()=>{
+    d1.textContent=diceFaces[Math.floor(Math.random()*6)];
+    d2.textContent=diceFaces[Math.floor(Math.random()*6)];
+    ticks++;
+    if(ticks>18){
+      clearInterval(inter);
+      d1.classList.remove('rolling'); d2.classList.remove('rolling');
+      const r1=Math.ceil(Math.random()*6);
+      const r2=Math.ceil(Math.random()*6);
+      d1.textContent=diceFaces[r1-1]; d2.textContent=diceFaces[r2-1];
+      showResult(bet,r1,r2);
+      document.getElementById('rollBtn').disabled=false;
+    }
+  },80);
+}
+
+function showResult(bet,r1,r2){
+  const rb=document.getElementById('resultBox');
+  // win if prediction matches either die
+  const win = r1===selected || r2===selected;
+  rb.classList.remove('win-anim'); void rb.offsetWidth; rb.classList.add('win-anim');
+  if(win){
+    const payout=bet*5; balance+=payout; updateBal();
+    rb.innerHTML=`<div class="result-emoji">🎉</div><div class="result-msg" style="color:var(--green)">YOU WIN! +${payout} 🪙</div><div class="result-detail">Rolled ${r1} & ${r2} — You guessed ${selected}</div>`;
+    showToast('Won '+payout+' Coins! 🎉','win');
+    addHist('+'+payout,true);
+  } else {
+    rb.innerHTML=`<div class="result-emoji">😢</div><div class="result-msg" style="color:var(--red)">MISS! -${bet} 🪙</div><div class="result-detail">Rolled ${r1} & ${r2} — You guessed ${selected}</div>`;
+    showToast('Missed! -'+bet+' Coins','lose');
+    addHist('-'+bet,false);
+  }
+}
+
+function addHist(label,win){
+  const row=document.getElementById('histRow');
+  const el=document.createElement('div');
+  el.className='hc '+(win?'hc-w':'hc-l');
+  el.textContent=label; row.prepend(el);
+  if(row.children.length>10)row.removeChild(row.lastChild);
+}
+
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(()=>t.className='toast',2500);
+}
+</script>
+</body>
+</html>
