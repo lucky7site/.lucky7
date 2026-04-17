@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Aviator Crash – Lucky 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050508;--green:#00ff88;--blue:#00c8ff;--red:#ff4466;--gold:#ffd700;--text:#e8eaf0;--muted:#7a7d8e;--border:rgba(255,255,255,0.08);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(0,200,255,0.07) 0%,transparent 60%);pointer-events:none;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(5,5,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.back-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}
+.page-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--blue);}
+.balance-chip{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:20px;padding:6px 14px;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--green);}
+.flight-zone{position:relative;margin:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:20px;height:220px;overflow:hidden;}
+.stars{position:absolute;inset:0;}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite;}
+@keyframes twinkle{0%,100%{opacity:0.3}50%{opacity:1}}
+canvas#flightCanvas{position:absolute;inset:0;width:100%;height:100%;}
+.rocket{position:absolute;font-size:36px;filter:drop-shadow(0 0 12px var(--blue));}
+.multiplier-display{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Orbitron',sans-serif;font-size:44px;font-weight:900;text-align:center;text-shadow:0 0 20px currentColor;}
+.mult-label{font-size:13px;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px;opacity:0.7;margin-top:-4px;}
+.crash-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,68,102,0.15);opacity:0;transition:.3s;backdrop-filter:blur(4px);}
+.crash-msg.show{opacity:1;}
+.crash-title{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;color:var(--red);text-shadow:0 0 20px var(--red);}
+.controls{padding:16px;display:flex;flex-direction:column;gap:12px;}
+.bet-row{display:flex;gap:10px;align-items:center;}
+.bet-label{font-size:14px;color:var(--muted);font-weight:600;}
+.bet-input{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;width:100px;outline:none;text-align:center;}
+.bet-input:focus{border-color:var(--blue);}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-bet{border:none;border-radius:14px;padding:14px;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.btn-bet:active{transform:scale(0.95);}
+.btn-start{background:linear-gradient(90deg,#0066aa,var(--blue));color:#000;}
+.btn-cash{background:linear-gradient(90deg,#006644,var(--green));color:#000;}
+.btn-cash:disabled,.btn-start:disabled{opacity:0.4;pointer-events:none;}
+.dist-info{margin:0 16px 8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:11px;padding:9px 14px;}
+.dist-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;}
+.dist-lbl{color:var(--muted);}
+.dist-val{font-weight:700;}
+.hist-row{display:flex;gap:8px;overflow-x:auto;padding:0 16px 16px;scrollbar-width:none;}
+.hist-row::-webkit-scrollbar{display:none;}
+.hist-chip{border-radius:10px;padding:6px 12px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.hc-green{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+.hc-red{background:rgba(255,68,102,0.12);color:var(--red);border:1px solid rgba(255,68,102,0.2);}
+.status-bar{margin:0 16px 8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--muted);text-align:center;font-weight:600;}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(10,10,20,0.95);border:1px solid var(--border);border-radius:14px;padding:10px 20px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;z-index:400;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{border-color:var(--green);color:var(--green);}
+.toast.lose{border-color:var(--red);color:var(--red);}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="back-btn" onclick="location.href='index.html'">←</div>
+  <div class="page-title">🚀 Aviator Crash</div>
+  <div class="balance-chip" id="balChip">🪙 0</div>
+</header>
+<div class="flight-zone">
+  <div class="stars" id="stars"></div>
+  <canvas id="flightCanvas"></canvas>
+  <div class="rocket" id="rocket" style="position:absolute;left:5%;bottom:5%;">✈️</div>
+  <div class="multiplier-display" id="multDisp" style="color:var(--green)">
+    <div id="multVal">1.00x</div>
+    <div class="mult-label">MULTIPLIER</div>
+  </div>
+  <div class="crash-msg" id="crashMsg">
+    <div class="crash-title">💥 CRASHED!</div>
+    <div id="crashAt" style="color:var(--red);font-family:'Orbitron',sans-serif;font-size:18px;margin-top:4px;"></div>
+  </div>
+</div>
+<div class="status-bar" id="statusBar">Place your bet and click START ROUND</div>
+<div class="dist-info">
+  <div style="font-size:10px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Crash Distribution</div>
+  <div class="dist-row"><span class="dist-lbl">Below 2x</span><span class="dist-val" style="color:var(--red)">70%</span></div>
+  <div class="dist-row"><span class="dist-lbl">Above 2x</span><span class="dist-val" style="color:var(--gold)">30%</span></div>
+  <div class="dist-row"><span class="dist-lbl">Above 3x</span><span class="dist-val" style="color:var(--blue)">20%</span></div>
+  <div class="dist-row"><span class="dist-lbl">Above 5x</span><span class="dist-val" style="color:var(--green)">2%</span></div>
+</div>
+<div class="controls">
+  <div class="bet-row">
+    <span class="bet-label">Bet:</span>
+    <input type="number" class="bet-input" id="betAmt" value="10" min="1">
+    <span class="bet-label">Coins</span>
+  </div>
+  <div class="btns">
+    <button class="btn-bet btn-start" id="startBtn" onclick="startRound()">START ROUND</button>
+    <button class="btn-bet btn-cash"  id="cashBtn"  onclick="doCashOut()" disabled>CASH OUT</button>
+  </div>
+</div>
+<div class="hist-row" id="histRow"></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="wallet.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyClNX5DPD55Lhj_N-UwfWtD5VssOZQZ9qw",
+  authDomain:"lucky7-64a59.firebaseapp.com",
+  projectId:"lucky7-64a59",
+  storageBucket:"lucky7-64a59.firebasestorage.app",
+  messagingSenderId:"950599334529",
+  appId:"1:950599334529:web:ca04176afa45a923532b80"
+});
+L7Wallet.init();
+L7Wallet.onBalChange(function(bal){ document.getElementById('balChip').textContent='🪙 '+bal; });
+
+// Stars
+var starsEl = document.getElementById('stars');
+for (var i=0;i<50;i++){
+  var s=document.createElement('div'); s.className='star';
+  s.style.cssText='width:'+(Math.random()*2+1)+'px;height:'+(Math.random()*2+1)+'px;top:'+Math.random()*100+'%;left:'+Math.random()*100+'%;animation-delay:'+Math.random()*2+'s;animation-duration:'+(1.5+Math.random()*2)+'s;';
+  starsEl.appendChild(s);
+}
+
+// Canvas
+var canvas = document.getElementById('flightCanvas');
+var ctx    = canvas.getContext('2d');
+var points = [];
+function resizeCanvas(){ canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight; }
+resizeCanvas();
+
+function drawPath(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(points.length<2) return;
+  var maxT=points[points.length-1].t;
+  var maxM=Math.max.apply(null,points.map(function(p){return p.m;}));
+  maxM=Math.max(maxM,2);
+  ctx.beginPath();
+  points.forEach(function(p,i){
+    var x=(p.t/Math.max(maxT,1))*canvas.width*0.9+canvas.width*0.05;
+    var y=canvas.height-(p.m/maxM)*(canvas.height*0.85)+canvas.height*0.05;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='rgba(0,200,255,0.6)'; ctx.lineWidth=2.5; ctx.stroke();
+  ctx.lineTo(canvas.width,canvas.height); ctx.lineTo(0,canvas.height); ctx.closePath();
+  var grad=ctx.createLinearGradient(0,0,0,canvas.height);
+  grad.addColorStop(0,'rgba(0,200,255,0.15)'); grad.addColorStop(1,'rgba(0,200,255,0)');
+  ctx.fillStyle=grad; ctx.fill();
+}
+
+// Crash distribution: 70% <2x, 28% 2-5x, 2% >5x
+function genCrash(){
+  var r=Math.random();
+  if(r<0.70) return 1.00+Math.random()*0.99;   // 70%: 1.00–1.99
+  if(r<0.80) return 2.00+Math.random()*0.99;   // 10%: 2.00–2.99
+  if(r<0.98) return 3.00+Math.random()*1.99;   // 18%: 3.00–4.99
+  return 5.00+Math.random()*45.00;             //  2%: 5.00–50.0
+}
+
+var gameRunning=false, cashedOut=false, interval=null;
+var mult=1.0, crashPoint=1.0, betAmount=0, t=0;
+
+function startRound(){
+  var bet=parseInt(document.getElementById('betAmt').value)||10;
+  var bal=L7Wallet.getBalance();
+  if(bet<1||bet>bal){ showToast('Not enough coins!','lose'); return; }
+
+  betAmount=bet; mult=1.0; t=0; points=[];
+  gameRunning=true; cashedOut=false;
+  crashPoint=genCrash();
+  console.log('[Aviator] New round. Crash at', crashPoint.toFixed(2)+'x');
+
+  document.getElementById('startBtn').disabled=true;
+  document.getElementById('cashBtn').disabled=false;
+  document.getElementById('crashMsg').classList.remove('show');
+  document.getElementById('statusBar').textContent='🚀 Round in progress... Cash out before crash!';
+  document.getElementById('multDisp').style.color='var(--green)';
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Deduct bet from Firestore
+  L7Wallet.deduct(bet).then(function(){ console.log('[Aviator] Bet deducted:', bet); });
+
+  interval=setInterval(function(){
+    t+=0.1; mult=Math.pow(1.06,t*5);
+    points.push({t:t,m:mult});
+    var pct=Math.min(mult/crashPoint,1);
+    var rocket=document.getElementById('rocket');
+    rocket.style.left=(10+pct*70)+'%'; rocket.style.bottom=(5+pct*70)+'%';
+    document.getElementById('multVal').textContent=mult.toFixed(2)+'x';
+    drawPath();
+    if(mult>=crashPoint&&!cashedOut) doCrash();
+  },80);
+}
+
+function doCashOut(){
+  if(!gameRunning||cashedOut) return;
+  cashedOut=true; clearInterval(interval);
+  var win=Math.floor(betAmount*mult);
+  gameRunning=false;
+  document.getElementById('startBtn').disabled=false;
+  document.getElementById('cashBtn').disabled=true;
+  document.getElementById('statusBar').textContent='✅ Cashed out at '+mult.toFixed(2)+'x! Won '+win+' coins';
+  // Credit winnings to Firestore
+  L7Wallet.credit(win).then(function(){ console.log('[Aviator] Cashout credited:', win); });
+  showToast('Cashed out! +'+win+' Coins 💰','win');
+  addHistory(mult.toFixed(2)+'x', true);
+}
+
+function doCrash(){
+  clearInterval(interval); gameRunning=false;
+  document.getElementById('crashMsg').classList.add('show');
+  document.getElementById('crashAt').textContent='Crashed at '+crashPoint.toFixed(2)+'x';
+  document.getElementById('multDisp').style.color='var(--red)';
+  document.getElementById('startBtn').disabled=false;
+  document.getElementById('cashBtn').disabled=true;
+  document.getElementById('statusBar').textContent='💥 Crashed at '+crashPoint.toFixed(2)+'x — You lost '+betAmount+' coins!';
+  showToast('Crashed! -'+betAmount+' Coins 💥','lose');
+  addHistory(crashPoint.toFixed(2)+'x', false);
+  setTimeout(function(){
+    var r=document.getElementById('rocket');
+    r.style.left='5%'; r.style.bottom='5%';
+  },2000);
+}
+
+function addHistory(label, win){
+  var row=document.getElementById('histRow');
+  var el=document.createElement('div');
+  el.className='hist-chip '+(win?'hc-green':'hc-red');
+  el.textContent=label; row.prepend(el);
+  if(row.children.length>12) row.removeChild(row.lastChild);
+}
+
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(function(){ t.className='toast'; },2500);
+}
+</script>
+</body>
+</html>
