@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lucky Spin – Lucky 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050508;--green:#00ff88;--purple:#b44fff;--blue:#00c8ff;--gold:#ffd700;--red:#ff4466;--text:#e8eaf0;--muted:#7a7d8e;--border:rgba(255,255,255,0.08);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 20%,rgba(255,215,0,0.08) 0%,transparent 70%);pointer-events:none;}
+.topbar{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(5,5,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;}
+.back-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:var(--text);}
+.page-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--gold);}
+.bal-chip{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:20px;padding:6px 14px;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--green);}
+.wheel-section{display:flex;flex-direction:column;align-items:center;padding:30px 20px;width:100%;}
+.wheel-wrap{position:relative;width:280px;height:280px;margin:0 auto;}
+.wheel-pointer{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:30px;z-index:10;filter:drop-shadow(0 0 8px var(--gold));}
+canvas#wheel{width:280px;height:280px;border-radius:50%;box-shadow:0 0 30px rgba(255,215,0,0.25);}
+.spin-btn{margin-top:28px;padding:16px 48px;border:none;border-radius:18px;background:linear-gradient(90deg,var(--gold),#ff8c00);font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:#000;cursor:pointer;letter-spacing:2px;box-shadow:0 0 20px rgba(255,215,0,0.4);transition:.2s;}
+.spin-btn:disabled{opacity:0.5;pointer-events:none;}
+.spin-btn:active{transform:scale(0.95);}
+.bet-row{display:flex;gap:10px;margin-top:20px;align-items:center;}
+.bet-label{font-size:14px;color:var(--muted);font-weight:600;}
+.bet-input{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;padding:8px 14px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;width:100px;outline:none;text-align:center;}
+.bet-input:focus{border-color:var(--gold);}
+.result-box{margin-top:22px;width:90%;max-width:320px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:18px;padding:18px;text-align:center;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.result-label{font-size:13px;color:var(--muted);margin-bottom:4px;}
+.result-val{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;}
+@keyframes winPop{0%{transform:scale(0.8)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+.win-anim{animation:winPop .4s ease;}
+.history{width:90%;max-width:320px;margin-top:16px;margin-bottom:30px;}
+.history-title{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+.history-list{display:flex;flex-wrap:wrap;gap:6px;}
+.h-item{border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;font-family:'Orbitron',sans-serif;}
+.h-win{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+.h-lose{background:rgba(255,68,102,0.12);color:var(--red);border:1px solid rgba(255,68,102,0.2);}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(10,10,20,0.95);border:1px solid var(--border);border-radius:14px;padding:10px 20px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;z-index:400;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{border-color:var(--green);color:var(--green);}
+.toast.lose{border-color:var(--red);color:var(--red);}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="back-btn" onclick="location.href='index.html'">←</div>
+  <div class="page-title">🎰 Lucky Spin</div>
+  <div class="bal-chip" id="balChip">🪙 0</div>
+</header>
+<div class="wheel-section">
+  <div class="wheel-wrap">
+    <div class="wheel-pointer">▼</div>
+    <canvas id="wheel" width="280" height="280"></canvas>
+  </div>
+  <div class="bet-row">
+    <span class="bet-label">Bet:</span>
+    <input type="number" class="bet-input" id="betAmt" value="10" min="1">
+    <span class="bet-label">Coins</span>
+  </div>
+  <button class="spin-btn" id="spinBtn" onclick="doSpin()">SPIN!</button>
+  <div class="result-box" id="resultBox">
+    <div class="result-label">Spin the wheel to win coins!</div>
+    <div class="result-val" id="resultVal">—</div>
+  </div>
+  <div class="history">
+    <div class="history-title">Recent Results</div>
+    <div class="history-list" id="histList"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ── Firebase + Wallet (inlined) ────────────────────────────────────
+firebase.initializeApp({
+  apiKey:"AIzaSyClNX5DPD55Lhj_N-UwfWtD5VssOZQZ9qw",
+  authDomain:"lucky7-64a59.firebaseapp.com",
+  projectId:"lucky7-64a59",
+  storageBucket:"lucky7-64a59.firebasestorage.app",
+  messagingSenderId:"950599334529",
+  appId:"1:950599334529:web:ca04176afa45a923532b80"
+});
+var db = firebase.firestore();
+var sessStr = localStorage.getItem('l7_current_user');
+if (!sessStr) { location.replace('auth.html'); }
+var currentUser; try { currentUser = JSON.parse(sessStr); } catch(e) { location.replace('auth.html'); }
+var _balance = parseInt(localStorage.getItem('l7_balance') || '0');
+
+function getBalance()  { return _balance; }
+function showBal()     { document.getElementById('balChip').textContent = '🪙 ' + _balance; }
+
+function walletDeduct(amount) {
+  _balance -= amount;
+  if (_balance < 0) _balance = 0;
+  localStorage.setItem('l7_balance', String(_balance)); showBal();
+  return db.collection('users').doc(currentUser.id).update({ wallet: firebase.firestore.FieldValue.increment(-amount) });
+}
+function walletCredit(amount) {
+  _balance += amount;
+  localStorage.setItem('l7_balance', String(_balance)); showBal();
+  return db.collection('users').doc(currentUser.id).update({ wallet: firebase.firestore.FieldValue.increment(amount) });
+}
+// Live listener so balance stays fresh
+db.collection('users').doc(currentUser.id).onSnapshot(function(snap) {
+  if (!snap.exists) return;
+  _balance = snap.data().wallet || 0;
+  localStorage.setItem('l7_balance', String(_balance)); showBal();
+});
+
+// ── Wheel ──────────────────────────────────────────────────────────
+var segments = [
+  {label:'2x',color:'#b44fff',mult:2},
+  {label:'LOSE',color:'#ff4466',mult:0},
+  {label:'1.5x',color:'#00c8ff',mult:1.5},
+  {label:'LOSE',color:'#331a00',mult:0},
+  {label:'3x',color:'#ffd700',mult:3},
+  {label:'LOSE',color:'#1a0033',mult:0},
+  {label:'1x',color:'#00ff88',mult:1},
+  {label:'5x',color:'#ff8c00',mult:5},
+];
+var NUM = segments.length;
+var ARC = (2 * Math.PI) / NUM;
+var canvas = document.getElementById('wheel');
+var ctx    = canvas.getContext('2d');
+var wheelAngle = 0;
+
+function drawWheel(rot) {
+  rot = rot || 0;
+  ctx.clearRect(0,0,280,280);
+  var cx=140,cy=140,r=130;
+  segments.forEach(function(s,i){
+    var start = rot + i*ARC - Math.PI/2;
+    var end   = start + ARC;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,end); ctx.closePath();
+    ctx.fillStyle=s.color; ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(start+ARC/2);
+    ctx.textAlign='right'; ctx.fillStyle='#fff';
+    ctx.font='bold 13px Orbitron,sans-serif';
+    ctx.shadowColor='#000'; ctx.shadowBlur=4;
+    ctx.fillText(s.label, r-14, 5); ctx.restore();
+  });
+  ctx.beginPath(); ctx.arc(cx,cy,22,0,2*Math.PI);
+  ctx.fillStyle='#0a0a14'; ctx.fill();
+  ctx.strokeStyle='rgba(255,215,0,0.4)'; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle='#ffd700'; ctx.font='bold 14px Orbitron,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('7',cx,cy+1);
+}
+drawWheel(); showBal();
+
+function doSpin() {
+  var bet = parseInt(document.getElementById('betAmt').value)||10;
+  if (bet<1 || bet>getBalance()) { showToast('Not enough coins!','lose'); return; }
+  document.getElementById('spinBtn').disabled = true;
+  walletDeduct(bet);
+  var extra      = 5 + Math.floor(Math.random()*5);
+  var targetSeg  = Math.floor(Math.random()*NUM);
+  var targetAngle= -(targetSeg*ARC)-(ARC/2)+(extra*2*Math.PI);
+  var duration   = 3000 + Math.random()*1000;
+  var startTime  = Date.now();
+  var startAngle = wheelAngle;
+  function animate() {
+    var t    = Math.min((Date.now()-startTime)/duration,1);
+    var ease = 1-Math.pow(1-t,3);
+    wheelAngle = startAngle + targetAngle*ease;
+    drawWheel(wheelAngle);
+    if (t<1) { requestAnimationFrame(animate); }
+    else { document.getElementById('spinBtn').disabled=false; showResult(bet,targetSeg); }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showResult(bet,segIdx) {
+  var seg=segments[segIdx];
+  var rb=document.getElementById('resultBox');
+  var rv=document.getElementById('resultVal');
+  if (seg.mult===0) {
+    rv.textContent='LOSE 😢'; rv.style.color='var(--red)';
+    rb.style.borderColor='var(--red)';
+    rb.classList.remove('win-anim'); void rb.offsetWidth; rb.classList.add('win-anim');
+    showToast('-'+bet+' Coins! 😢','lose');
+    addHist('-'+bet,false);
+  } else {
+    var win=Math.floor(bet*seg.mult);
+    walletCredit(win);
+    rv.textContent='+'+win+' 🪙 ('+seg.label+')'; rv.style.color='var(--green)';
+    rb.style.borderColor='var(--green)';
+    rb.classList.remove('win-anim'); void rb.offsetWidth; rb.classList.add('win-anim');
+    showToast('Won '+win+' Coins! 🎉','win');
+    addHist('+'+win,true);
+  }
+}
+
+function addHist(label,win) {
+  var list=document.getElementById('histList');
+  var el=document.createElement('div');
+  el.className='h-item '+(win?'h-win':'h-lose');
+  el.textContent=label; list.prepend(el);
+  if(list.children.length>10) list.removeChild(list.lastChild);
+}
+function showToast(msg,type) {
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(function(){ t.className='toast'; },2500);
+}
+</script>
+</body>
+</html>
