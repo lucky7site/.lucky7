@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Aviator Crash – Lucky 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050508;--green:#00ff88;--blue:#00c8ff;--red:#ff4466;--gold:#ffd700;--text:#e8eaf0;--muted:#7a7d8e;--border:rgba(255,255,255,0.08);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(0,200,255,0.07) 0%,transparent 60%);pointer-events:none;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(5,5,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.back-btn{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:var(--text);}
+.page-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--blue);}
+.bal-chip{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:20px;padding:6px 14px;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--green);}
+.flight-zone{position:relative;margin:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:20px;height:220px;overflow:hidden;}
+.stars{position:absolute;inset:0;}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle 2s infinite;}
+@keyframes twinkle{0%,100%{opacity:0.3}50%{opacity:1}}
+canvas#flightCanvas{position:absolute;inset:0;width:100%;height:100%;}
+.rocket{position:absolute;font-size:36px;filter:drop-shadow(0 0 12px var(--blue));transition:filter 0.2s;}
+.multiplier-display{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Orbitron',sans-serif;font-size:44px;font-weight:900;text-align:center;text-shadow:0 0 20px currentColor;pointer-events:none;}
+.mult-label{font-size:13px;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:2px;opacity:0.7;margin-top:-4px;}
+.crash-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,68,102,0.15);opacity:0;transition:.3s;backdrop-filter:blur(4px);pointer-events:none;}
+.crash-msg.show{opacity:1;}
+.crash-title{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;color:var(--red);text-shadow:0 0 20px var(--red);}
+.controls{padding:16px;display:flex;flex-direction:column;gap:12px;}
+.bet-row{display:flex;gap:10px;align-items:center;}
+.bet-label{font-size:14px;color:var(--muted);font-weight:600;}
+.bet-input{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;width:100px;outline:none;text-align:center;}
+.bet-input:focus{border-color:var(--blue);}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-bet{border:none;border-radius:14px;padding:14px;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.btn-bet:active{transform:scale(0.95);}
+.btn-start{background:linear-gradient(90deg,#0066aa,var(--blue));color:#000;}
+.btn-cash{background:linear-gradient(90deg,#006644,var(--green));color:#000;}
+.btn-cash:disabled,.btn-start:disabled{opacity:0.4;pointer-events:none;}
+.status-bar{margin:0 16px 8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--muted);text-align:center;font-weight:600;}
+.hist-row{display:flex;gap:8px;overflow-x:auto;padding:0 16px 16px;scrollbar-width:none;}
+.hist-row::-webkit-scrollbar{display:none;}
+.hist-chip{border-radius:10px;padding:6px 12px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.hc-green{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+.hc-red{background:rgba(255,68,102,0.12);color:var(--red);border:1px solid rgba(255,68,102,0.2);}
+.hc-gold{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(10,10,20,0.95);border:1px solid var(--border);border-radius:14px;padding:10px 20px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;z-index:400;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{border-color:var(--green);color:var(--green);}
+.toast.lose{border-color:var(--red);color:var(--red);}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="back-btn" onclick="history.back()">←</div>
+  <div class="page-title">🚀 Aviator Crash</div>
+  <div class="bal-chip" id="balChip">🪙 0</div>
+</header>
+
+<div class="flight-zone">
+  <div class="stars" id="stars"></div>
+  <canvas id="flightCanvas"></canvas>
+  <div class="rocket" id="rocket" style="left:5%;bottom:8%;">✈️</div>
+  <div class="multiplier-display" id="multDisp" style="color:var(--green)">
+    <div id="multVal">1.00x</div>
+    <div class="mult-label" id="multLabel">WAITING</div>
+  </div>
+  <div class="crash-msg" id="crashMsg">
+    <div class="crash-title">💥 CRASHED!</div>
+    <div id="crashAt" style="color:var(--red);font-family:'Orbitron',sans-serif;font-size:18px;margin-top:4px;"></div>
+  </div>
+</div>
+
+<div class="status-bar" id="statusBar">Place your bet and click START ROUND</div>
+
+<div class="controls">
+  <div class="bet-row">
+    <span class="bet-label">Bet:</span>
+    <input type="number" class="bet-input" id="betAmt" value="10" min="1">
+    <span class="bet-label">Coins</span>
+  </div>
+  <div class="btns">
+    <button class="btn-bet btn-start" id="startBtn" onclick="startRound()">START ROUND</button>
+    <button class="btn-bet btn-cash"  id="cashBtn"  onclick="doCashOut()" disabled>CASH OUT</button>
+  </div>
+</div>
+
+<div class="hist-row" id="histRow"></div>
+<div class="toast" id="toastEl"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ─── Firebase ───────────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey:"AIzaSyClNX5DPD55Lhj_N-UwfWtD5VssOZQZ9qw",
+  authDomain:"lucky7-64a59.firebaseapp.com",
+  projectId:"lucky7-64a59",
+  storageBucket:"lucky7-64a59.firebasestorage.app",
+  messagingSenderId:"950599334529",
+  appId:"1:950599334529:web:ca04176afa45a923532b80"
+});
+var db = firebase.firestore();
+
+var sessStr = localStorage.getItem('l7_current_user');
+if (!sessStr) { location.replace('login.html'); }
+var currentUser;
+try { currentUser = JSON.parse(sessStr); } catch(e) { location.replace('login.html'); }
+
+var _balance = parseInt(localStorage.getItem('l7_balance') || '0');
+function showBal() { document.getElementById('balChip').textContent = '🪙 ' + _balance; }
+showBal();
+
+function walletDeduct(n) {
+  _balance -= n;
+  if (_balance < 0) _balance = 0;
+  localStorage.setItem('l7_balance', String(_balance));
+  showBal();
+  return db.collection('users').doc(currentUser.id).update({ wallet: firebase.firestore.FieldValue.increment(-n) });
+}
+function walletCredit(n) {
+  _balance += n;
+  localStorage.setItem('l7_balance', String(_balance));
+  showBal();
+  return db.collection('users').doc(currentUser.id).update({ wallet: firebase.firestore.FieldValue.increment(n) });
+}
+db.collection('users').doc(currentUser.id).onSnapshot(function(snap) {
+  if (!snap.exists) return;
+  _balance = snap.data().wallet || 0;
+  localStorage.setItem('l7_balance', String(_balance));
+  showBal();
+});
+
+// ─── Stars ──────────────────────────────────────────────────────────────────
+var starsEl = document.getElementById('stars');
+for (var i = 0; i < 55; i++) {
+  var s = document.createElement('div');
+  s.className = 'star';
+  s.style.cssText = 'width:'+(Math.random()*2+1)+'px;height:'+(Math.random()*2+1)+'px;'
+    +'top:'+Math.random()*100+'%;left:'+Math.random()*100+'%;'
+    +'animation-delay:'+Math.random()*2+'s;animation-duration:'+(1.5+Math.random()*2)+'s;';
+  starsEl.appendChild(s);
+}
+
+// ─── Canvas ──────────────────────────────────────────────────────────────────
+var canvas = document.getElementById('flightCanvas');
+var ctx    = canvas.getContext('2d');
+var points = [];
+
+function resizeCanvas() {
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function drawPath() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (points.length < 2) return;
+
+  // Dynamic scale: fit the curve to the canvas using actual data range
+  var maxT = points[points.length - 1].t;
+  var maxM = Math.max.apply(null, points.map(function(p){ return p.m; }));
+  maxM = Math.max(maxM, 1.5);
+
+  var W  = canvas.width;
+  var H  = canvas.height;
+  var padL = W * 0.06, padR = W * 0.06;
+  var padT = H * 0.08, padB = H * 0.10;
+
+  // Map a data point → pixel
+  function px(p) {
+    var x = padL + (p.t / Math.max(maxT, 0.001)) * (W - padL - padR);
+    var y = (H - padB) - (((p.m - 1) / (maxM - 1)) * (H - padT - padB));
+    return { x: x, y: y };
+  }
+
+  // Draw filled area
+  ctx.beginPath();
+  var first = px(points[0]);
+  ctx.moveTo(first.x, first.y);
+  for (var i = 1; i < points.length; i++) {
+    var pt = px(points[i]);
+    ctx.lineTo(pt.x, pt.y);
+  }
+  var last = px(points[points.length - 1]);
+  ctx.lineTo(last.x, H - padB);
+  ctx.lineTo(first.x, H - padB);
+  ctx.closePath();
+  var grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(0,200,255,0.18)');
+  grad.addColorStop(1, 'rgba(0,200,255,0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Draw line
+  ctx.beginPath();
+  ctx.moveTo(first.x, first.y);
+  for (var j = 1; j < points.length; j++) {
+    var pt2 = px(points[j]);
+    ctx.lineTo(pt2.x, pt2.y);
+  }
+  ctx.strokeStyle = 'rgba(0,220,255,0.85)';
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  ctx.stroke();
+
+  // Update rocket position to follow the curve tip
+  var tip    = px(points[points.length - 1]);
+  var rocket = document.getElementById('rocket');
+  var fz     = rocket.parentElement;
+  var fzW    = fz.offsetWidth;
+  var fzH    = fz.offsetHeight;
+  // Clamp so rocket stays inside box
+  var rx = Math.min(Math.max(tip.x / W * fzW, 16), fzW - 48);
+  var ry = Math.min(Math.max((H - tip.y) / H * fzH, 16), fzH - 48);
+  rocket.style.left   = rx + 'px';
+  rocket.style.bottom = ry + 'px';
+}
+
+// ─── Crash Point Generation ──────────────────────────────────────────────────
+// Distribution:
+//   80% → crash before 2x   (1.00 – 1.99)
+//   10% → crash 2x – 3x     (2.00 – 2.99)
+//    8% → crash 3x – 6x     (3.00 – 5.99)
+//    2% → crash above 6x    (6.00 – 50x)
+//
+// IMPORTANT: crashPoint is decided BEFORE the round starts.
+// The animation loop checks elapsed time, NOT position on screen.
+// This completely decouples visual position from crash logic.
+
+function genCrashPoint() {
+  var r = Math.random();
+  if (r < 0.80) {
+    // 80 % → 1.00 to 1.99
+    // Weight toward lower values: use sqrt so most land near 1.0–1.5
+    return 1.00 + Math.pow(Math.random(), 0.7) * 0.99;
+  }
+  if (r < 0.90) {
+    // 10 % → 2.00 to 2.99
+    return 2.00 + Math.random() * 0.99;
+  }
+  if (r < 0.98) {
+    // 8 % → 3.00 to 5.99
+    return 3.00 + Math.random() * 2.99;
+  }
+  // 2 % → 6.00 to 50.00  (rare big wins)
+  return 6.00 + Math.pow(Math.random(), 0.5) * 44.00;
+}
+
+// ─── Game State ──────────────────────────────────────────────────────────────
+var gameRunning  = false;
+var cashedOut    = false;
+var animFrame    = null;   // requestAnimationFrame handle — NOT setInterval
+var mult         = 1.00;
+var crashPoint   = 1.00;
+var betAmount    = 0;
+var startTime    = 0;      // performance.now() when round began
+var lastTime     = 0;
+
+// Growth formula: mult = e^(k * elapsed_seconds)
+// k = 0.8 gives:  1x at t=0, 2x at ~0.87s, 3x at ~1.37s, 5x at ~2.01s, 10x at ~2.88s
+// Fast enough to feel exciting, slow enough to cash out.
+var K = 0.8;
+
+function calcMult(elapsedMs) {
+  var t = elapsedMs / 1000;
+  return Math.exp(K * t);
+}
+
+// ─── Round Start ─────────────────────────────────────────────────────────────
+function startRound() {
+  var bet = parseInt(document.getElementById('betAmt').value) || 10;
+  if (bet < 1) { showToast('Minimum bet is 1 coin.', 'lose'); return; }
+  if (bet > _balance) { showToast('Not enough coins!', 'lose'); return; }
+
+  betAmount   = bet;
+  mult        = 1.00;
+  points      = [];
+  gameRunning = true;
+  cashedOut   = false;
+
+  // ✅ Crash point decided RIGHT NOW, before animation starts.
+  // The animation loop will compare the live multiplier to this value.
+  // It has NO knowledge of screen coordinates — so there is zero
+  // visual tell about when it will crash.
+  crashPoint = genCrashPoint();
+
+  document.getElementById('startBtn').disabled  = true;
+  document.getElementById('cashBtn').disabled   = false;
+  document.getElementById('crashMsg').classList.remove('show');
+  document.getElementById('multDisp').style.color = 'var(--green)';
+  document.getElementById('multVal').textContent  = '1.00x';
+  document.getElementById('multLabel').textContent = 'MULTIPLIER';
+  document.getElementById('statusBar').textContent = '🚀 Round in progress… Cash out before crash!';
+  document.getElementById('rocket').style.filter   = 'drop-shadow(0 0 12px var(--blue))';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Reset rocket to start position
+  var rocket = document.getElementById('rocket');
+  rocket.style.left   = '5%';
+  rocket.style.bottom = '8%';
+
+  walletDeduct(bet);
+
+  startTime = performance.now();
+  lastTime  = startTime;
+
+  // Use requestAnimationFrame for smooth 60fps — NOT setInterval
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+// ─── Game Loop ───────────────────────────────────────────────────────────────
+function gameLoop(now) {
+  if (!gameRunning) return;
+
+  var elapsed = now - startTime;
+  mult = calcMult(elapsed);
+
+  // Record point for graph (throttle to ~60fps, store every ~50ms)
+  var t = elapsed / 1000;
+  var last = points.length ? points[points.length - 1] : null;
+  if (!last || (t - last.t) >= 0.05) {
+    points.push({ t: t, m: mult });
+  }
+
+  // Update multiplier display
+  document.getElementById('multVal').textContent = mult.toFixed(2) + 'x';
+
+  // Colour shifts: green → yellow → red as mult rises
+  if (mult < 1.5) {
+    document.getElementById('multDisp').style.color = 'var(--green)';
+  } else if (mult < 2.5) {
+    document.getElementById('multDisp').style.color = '#ffe033';
+  } else {
+    document.getElementById('multDisp').style.color = '#ff8844';
+  }
+
+  // Draw path (this also moves the rocket along the curve)
+  drawPath();
+
+  // ✅ CRASH CHECK: pure time/multiplier based.
+  // This fires at the exact moment mult crosses crashPoint —
+  // regardless of where the plane is on screen.
+  // At low crash points (e.g. 1.1x) this fires very early in the animation,
+  // when the rocket has barely moved — making it completely unpredictable visually.
+  if (mult >= crashPoint) {
+    triggerCrash();
+    return;
+  }
+
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+// ─── Cash Out ─────────────────────────────────────────────────────────────────
+function doCashOut() {
+  if (!gameRunning || cashedOut) return;
+  cashedOut   = true;
+  gameRunning = false;
+  cancelAnimationFrame(animFrame);
+
+  var win = Math.floor(betAmount * mult);
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('cashBtn').disabled  = true;
+  document.getElementById('multLabel').textContent = 'CASHED OUT';
+  document.getElementById('statusBar').textContent =
+    '✅ Cashed out at ' + mult.toFixed(2) + 'x! Won ' + win + ' coins';
+
+  walletCredit(win);
+  showToast('Cashed out! +' + win + ' Coins 💰', 'win');
+  addHistory(mult.toFixed(2) + 'x', true);
+}
+
+// ─── Crash ────────────────────────────────────────────────────────────────────
+function triggerCrash() {
+  cancelAnimationFrame(animFrame);
+  gameRunning = false;
+
+  // Show exact crash point (not mult — they're essentially equal here,
+  // but crashPoint is cleaner as it's the pre-decided value)
+  document.getElementById('multVal').textContent = crashPoint.toFixed(2) + 'x';
+  document.getElementById('multDisp').style.color = 'var(--red)';
+  document.getElementById('multLabel').textContent = 'CRASHED';
+  document.getElementById('crashMsg').classList.add('show');
+  document.getElementById('crashAt').textContent = 'Crashed at ' + crashPoint.toFixed(2) + 'x';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('cashBtn').disabled  = true;
+  document.getElementById('statusBar').textContent =
+    '💥 Crashed at ' + crashPoint.toFixed(2) + 'x — Lost ' + betAmount + ' coins!';
+  document.getElementById('rocket').style.filter = 'drop-shadow(0 0 16px var(--red))';
+
+  showToast('Crashed! -' + betAmount + ' Coins 💥', 'lose');
+  addHistory(crashPoint.toFixed(2) + 'x', false);
+}
+
+// ─── History Pills ────────────────────────────────────────────────────────────
+function addHistory(label, win) {
+  var row = document.getElementById('histRow');
+  var el  = document.createElement('div');
+  var v   = parseFloat(label);
+  if (!win) {
+    el.className = 'hist-chip hc-red';
+  } else if (v >= 3) {
+    el.className = 'hist-chip hc-gold';
+  } else {
+    el.className = 'hist-chip hc-green';
+  }
+  el.textContent = label;
+  row.prepend(el);
+  if (row.children.length > 14) row.removeChild(row.lastChild);
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  var el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.className   = 'toast ' + type + ' show';
+  setTimeout(function() { el.className = 'toast'; }, 2600);
+}
+</script>
+</body>
+</html>
