@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lucky 7 – Terms &amp; Policy</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#03030a;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);
+  --green:#00ff88;--blue:#00c8ff;--red:#ff4466;--gold:#ffd700;
+  --purple:#b44fff;--orange:#ff8c00;--text:#e8eaf0;--muted:#7a7d8e;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 20%,rgba(180,79,255,0.07),transparent 60%),
+             radial-gradient(ellipse at 80% 80%,rgba(0,200,255,0.05),transparent 50%);}
+
+/* ─── TERMS PAGE ─────────────────────────────────────────── */
+#termsPage{position:fixed;inset:0;z-index:3000;background:var(--bg);display:flex;flex-direction:column;overflow-y:auto;}
+.t-header{background:rgba(5,5,8,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:18px 20px;text-align:center;position:sticky;top:0;z-index:10;}
+.t-logo{font-family:'Poppins',sans-serif;font-size:26px;font-weight:900;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200%;animation:ls 3s linear infinite;letter-spacing:2px;}
+@keyframes ls{0%{background-position:0%}100%{background-position:200%}}
+.t-sub{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:1px;}
+.t-body{padding:24px 20px;flex:1;max-width:600px;margin:0 auto;width:100%;}
+.t-section{margin-bottom:28px;}
+.t-section h2{font-size:14px;font-weight:700;color:var(--green);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.t-section p{font-size:13px;color:rgba(232,234,240,0.75);line-height:1.7;margin-bottom:8px;}
+.t-section ul{font-size:13px;color:rgba(232,234,240,0.75);line-height:1.7;padding-left:20px;margin-bottom:8px;}
+.t-section ul li{margin-bottom:4px;}
+.t-hl{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.15);border-radius:12px;padding:14px 16px;margin-top:10px;font-size:13px;color:var(--green);line-height:1.6;}
+.t-footer{padding:32px 20px 40px;text-align:center;border-top:1px solid var(--border);}
+.t-footer p{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.t-copy{font-size:12px;color:rgba(255,255,255,0.15);margin-top:8px;}
+.yr{display:inline;cursor:pointer;color:rgba(255,255,255,0.15);font-size:12px;}
+
+/* ─── LOGIN ──────────────────────────────────────────────── */
+#loginScreen{position:fixed;inset:0;z-index:2000;background:rgba(3,3,10,0.98);backdrop-filter:blur(16px);display:none;align-items:center;justify-content:center;}
+.lb{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:24px;padding:36px 26px;width:90%;max-width:340px;text-align:center;box-shadow:0 0 60px rgba(180,79,255,0.12);}
+.lb-logo{font-size:22px;font-weight:800;color:var(--purple);margin-bottom:4px;}
+.lb-sub{font-size:12px;color:var(--muted);margin-bottom:24px;}
+.lb-inp{width:100%;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:'Poppins',sans-serif;font-size:15px;outline:none;margin-bottom:12px;transition:border-color .2s;}
+.lb-inp:focus{border-color:var(--purple);}
+.lb-btn{width:100%;border:none;border-radius:13px;padding:14px;background:linear-gradient(90deg,var(--purple),var(--blue));font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:1px;}
+.lb-btn:active{transform:scale(0.97);}
+.lb-err{color:var(--red);font-size:12px;margin-top:10px;min-height:18px;font-weight:600;}
+.lb-back{color:var(--muted);font-size:12px;margin-top:14px;cursor:pointer;}
+
+/* ─── SETTLE OVERLAY ─────────────────────────────────────── */
+.settle-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.3s;}
+.settle-overlay.open{opacity:1;pointer-events:all;}
+.settle-box{background:linear-gradient(160deg,#0d0d18,#0a0a14);border:1px solid var(--border);border-radius:22px;padding:28px 22px;width:90%;max-width:340px;text-align:center;}
+.settle-title{font-size:17px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.settle-match-name{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.settle-btns{display:flex;gap:10px;}
+.stb1{flex:1;border:none;border-radius:12px;padding:14px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#0066aa,var(--blue));color:#000;}
+.stb2{flex:1;border:none;border-radius:12px;padding:14px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#880022,var(--red));color:#fff;}
+.settle-cancel{margin-top:10px;background:none;border:1px solid var(--border);border-radius:10px;padding:10px;width:100%;color:var(--muted);font-family:'Poppins',sans-serif;font-size:13px;cursor:pointer;}
+
+/* ─── ADMIN PANEL ────────────────────────────────────────── */
+.admin-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:rgba(3,3,10,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+.admin-logo{font-size:14px;font-weight:800;color:var(--purple);display:flex;align-items:center;gap:8px;}
+.admin-badge{background:rgba(180,79,255,0.15);border:1px solid rgba(180,79,255,0.3);border-radius:8px;padding:3px 8px;font-size:10px;color:var(--purple);font-weight:700;}
+.logout-btn{border:1px solid var(--border);background:none;border-radius:9px;padding:5px 12px;color:var(--muted);font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.tabs{display:flex;overflow-x:auto;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{flex-shrink:0;padding:12px 14px;font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;cursor:pointer;background:none;border:none;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;}
+.tab-btn.active{color:var(--green);border-bottom:2px solid var(--green);}
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:12px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;}
+.stat-val{font-size:22px;font-weight:800;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.stat-green .stat-val{color:var(--green);}
+.stat-blue  .stat-val{color:var(--blue);}
+.stat-gold  .stat-val{color:var(--gold);}
+.stat-purple .stat-val{color:var(--purple);}
+.ping{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite;margin-left:6px;vertical-align:middle;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.section{padding:0 12px 12px;}
+.sec-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;padding:13px 0 10px;display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px;margin-bottom:8px;}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+.card-id{font-size:10px;color:var(--muted);}
+.card-body{margin-bottom:11px;}
+.crow{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.clbl{color:var(--muted);}
+.cval{font-weight:600;}
+.actions{display:flex;gap:7px;}
+.abtn{flex:1;border:none;border-radius:9px;padding:10px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;}
+.abtn:active{transform:scale(.95);}
+.approve{background:linear-gradient(90deg,#006644,var(--green));color:#000;}
+.reject{background:linear-gradient(90deg,#880022,var(--red));color:#fff;}
+.sbadge{display:inline-block;border-radius:7px;padding:2px 8px;font-size:10px;font-weight:700;}
+.sb-pending{background:rgba(255,140,0,.12);color:var(--orange);border:1px solid rgba(255,140,0,.25);}
+.sb-approved,.sb-won{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+.sb-rejected,.sb-lost{background:rgba(255,68,102,.1);color:var(--red);border:1px solid rgba(255,68,102,.2);}
+.sb-cashout{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.2);}
+/* FORM */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;}
+.form-title{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.fg{margin-bottom:12px;}
+.fl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block;}
+.fi{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'Poppins',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.fi:focus{border-color:var(--purple);}
+.fsel{width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'Poppins',sans-serif;font-size:13px;outline:none;cursor:pointer;}
+.fhint{font-size:10px;color:var(--muted);margin-top:4px;}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+/* ODDS + CASHOUT SECTION */
+.odds-cashout-section{background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:14px;padding:14px;margin-bottom:12px;}
+.ocs-title{font-size:12px;font-weight:700;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.odds-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.cashout-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.odds-input-wrap{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.oiw-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.oiw-inp{width:100%;background:none;border:none;color:var(--text);font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;outline:none;text-align:center;}
+.oiw-sub{font-size:9px;color:var(--muted);text-align:center;margin-top:3px;}
+/* MATCH CARDS */
+.match-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+.mc-title{font-size:13px;font-weight:700;margin-bottom:4px;}
+.mc-teams{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.mc-odds-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.mc-odds-chip{background:rgba(0,200,255,0.1);border:1px solid rgba(0,200,255,0.2);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--blue);}
+.mc-cashout-chip{background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--gold);}
+.mc-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.mc-btn{border:none;border-radius:8px;padding:7px 12px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;}
+.mc-btn:active{transform:scale(.95);}
+.btn-live{background:linear-gradient(90deg,#006644,var(--green));color:#000;}
+.btn-settle{background:linear-gradient(90deg,#7a4400,var(--gold));color:#000;}
+.btn-del{background:rgba(255,68,102,.12);color:var(--red);border:1px solid rgba(255,68,102,.2);}
+.btn-edit{background:rgba(180,79,255,.12);color:var(--purple);border:1px solid rgba(180,79,255,.2);}
+.btn-upcoming{background:rgba(255,140,0,.12);color:var(--orange);border:1px solid rgba(255,140,0,.2);}
+.status-live{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--green);}
+.status-live::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.status-upcoming{font-size:10px;font-weight:700;color:var(--orange);}
+/* BALANCE */
+.bal-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;}
+.cur-bal{font-size:26px;font-weight:800;color:var(--green);margin-bottom:10px;}
+.bal-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+.bal-inp{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;outline:none;}
+.badd{border:none;border-radius:9px;padding:9px 14px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#006644,var(--green));color:#000;}
+.bsub{border:none;border-radius:9px;padding:9px 14px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#880022,var(--red));color:#fff;}
+.bset{border:none;border-radius:9px;padding:9px 14px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#0066aa,var(--blue));color:#000;}
+/* USERS */
+.user-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px;margin-bottom:7px;}
+.uh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.un{font-size:13px;font-weight:700;}
+.ub{font-size:13px;font-weight:700;color:var(--green);}
+.us{font-size:11px;color:var(--muted);}
+.ua{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.uabtn{border:none;border-radius:8px;padding:7px 12px;font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
+.uadd{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+.usub{background:rgba(255,68,102,.12);color:var(--red);border:1px solid rgba(255,68,102,.2);}
+.umanage{background:rgba(0,200,255,.12);color:var(--blue);border:1px solid rgba(0,200,255,.2);}
+/* TOAST */
+.toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(10,10,20,.97);border:1px solid var(--border);border-radius:13px;padding:9px 18px;font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;z-index:600;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:var(--green);color:var(--green);}
+.toast.err{border-color:var(--red);color:var(--red);}
+.toast.info{border-color:var(--blue);color:var(--blue);}
+.empty{text-align:center;padding:24px;color:var(--muted);font-size:13px;}
+main{position:relative;z-index:1;padding-bottom:30px;}
+</style>
+</head>
+<body>
+
+<!-- ═══ TERMS PAGE ═══ -->
+<div id="termsPage">
+  <div class="t-header">
+    <div class="t-logo">Lucky 7</div>
+    <div class="t-sub">Terms of Service &amp; Privacy Policy</div>
+  </div>
+  <div class="t-body">
+    <div class="t-section">
+      <h2>📋 Terms of Service</h2>
+      <p>Welcome to Lucky 7. By accessing or using this platform, you agree to be bound by these Terms of Service. Please read them carefully before using any features of this application.</p>
+      <p>Lucky 7 is an entertainment platform designed for users aged 18 years and above. By registering, you confirm that you are at least 18 years of age and legally permitted to participate in gaming activities in your jurisdiction.</p>
+      <div class="t-hl">This platform operates with virtual coins only. Coins have no real-world monetary value unless explicitly stated in our withdrawal policy.</div>
+    </div>
+    <div class="t-section">
+      <h2>🎮 Platform Rules</h2>
+      <ul>
+        <li>Users must provide accurate registration information including a valid phone number.</li>
+        <li>One account per phone number. Duplicate accounts will be terminated.</li>
+        <li>Users are responsible for maintaining the confidentiality of their credentials.</li>
+        <li>Any attempt to exploit or manipulate the platform will result in account termination.</li>
+        <li>Lucky 7 reserves the right to modify or terminate any account without prior notice.</li>
+        <li>All game results are determined by certified random number generation systems.</li>
+      </ul>
+    </div>
+    <div class="t-section">
+      <h2>💰 Wallet &amp; Transactions</h2>
+      <p>Deposit and withdrawal requests are processed manually by our team within 24 hours.</p>
+      <ul>
+        <li>Minimum withdrawal amount is 500 coins.</li>
+        <li>Withdrawals are processed to the UPI ID provided during the request.</li>
+        <li>Lucky 7 is not responsible for failed transactions due to incorrect UPI details.</li>
+      </ul>
+    </div>
+    <div class="t-section">
+      <h2>🔒 Privacy Policy</h2>
+      <p>Lucky 7 collects and processes personal data solely to provide our services. Your data is stored on Google Firebase servers and is never sold to third parties.</p>
+    </div>
+    <div class="t-section">
+      <h2>⚖️ Disclaimer</h2>
+      <p>Lucky 7 is a skill and entertainment based gaming platform. We do not encourage gambling addiction. The administrators reserve the right to update these terms at any time.</p>
+    </div>
+  </div>
+  <div class="t-footer">
+    <p>By using Lucky 7, you acknowledge that you have read, understood and agree to all terms and policies.</p>
+    <div class="t-copy">
+      &copy; <span class="yr" onclick="openAdminLogin()">2026</span> Lucky 7. All rights reserved.
+    </div>
+    <div style="margin-top:14px;font-size:11px;color:rgba(255,255,255,0.05);">Powered by Lucky 7 Platform v3.0</div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN LOGIN ═══ -->
+<div id="loginScreen">
+  <div class="lb">
+    <div class="lb-logo">⚙️ Admin Panel</div>
+    <div class="lb-sub">Enter your admin credentials</div>
+    <input type="text"     class="lb-inp" id="adminUser" placeholder="Admin ID"  autocomplete="off">
+    <input type="password" class="lb-inp" id="adminPass" placeholder="Password"  autocomplete="off">
+    <button class="lb-btn" onclick="doAdminLogin()">ACCESS PANEL</button>
+    <div class="lb-err" id="loginErr"></div>
+    <div class="lb-back" onclick="backToTerms()">← Back to Terms</div>
+  </div>
+</div>
+
+<!-- ═══ SETTLE OVERLAY ═══ -->
+<div class="settle-overlay" id="settleOverlay">
+  <div class="settle-box">
+    <div class="settle-title">🏆 Declare Winner</div>
+    <div class="settle-match-name" id="settleMatchName"></div>
+    <div class="settle-btns">
+      <button class="stb1" id="settleT1Btn" onclick="declareWinner('team1')">Team 1</button>
+      <button class="stb2" id="settleT2Btn" onclick="declareWinner('team2')">Team 2</button>
+    </div>
+    <button class="settle-cancel" onclick="closeSettle()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ MAIN ADMIN PANEL ═══ -->
+<div id="adminUI" style="display:none;">
+  <header class="admin-header">
+    <div class="admin-logo">⚙️ LUCKY7 <span class="admin-badge">ADMIN</span></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div style="font-size:10px;color:var(--muted);" id="sessTimer">00:00</div>
+      <button class="logout-btn" onclick="doAdminLogout()">LOGOUT</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 OVERVIEW</button>
+    <button class="tab-btn" onclick="switchTab('matches')">🏏 MATCHES</button>
+    <button class="tab-btn" onclick="switchTab('deposits')">📥 DEPOSITS</button>
+    <button class="tab-btn" onclick="switchTab('withdrawals')">📤 WITHDRAWALS</button>
+    <button class="tab-btn" onclick="switchTab('bets')">💸 BETS</button>
+    <button class="tab-btn" onclick="switchTab('users')">👥 USERS</button>
+    <button class="tab-btn" onclick="switchTab('balance')">🪙 BALANCE</button>
+  </div>
+
+  <main>
+    <!-- OVERVIEW -->
+    <div id="tab-overview">
+      <div class="stats-row">
+        <div class="stat-card stat-green"><div class="stat-val" id="stUsers">—<span class="ping"></span></div><div class="stat-lbl">👥 Total Users</div></div>
+        <div class="stat-card stat-gold"><div class="stat-val" id="stDepPend">—</div><div class="stat-lbl">📥 Pending Deposits</div></div>
+        <div class="stat-card stat-blue"><div class="stat-val" id="stWdPend">—</div><div class="stat-lbl">📤 Pending Withdrawals</div></div>
+        <div class="stat-card stat-purple"><div class="stat-val" id="stBetsPend">—</div><div class="stat-lbl">💸 Live Bets</div></div>
+        <div class="stat-card stat-green" style="grid-column:span 2;"><div class="stat-val" id="stLive" style="font-size:13px;">No live match</div><div class="stat-lbl">🔴 Live Match Right Now</div></div>
+      </div>
+    </div>
+
+    <!-- MATCHES — with odds + cashout range fields -->
+    <div id="tab-matches" style="display:none;">
+      <div class="section">
+        <div class="sec-title">➕ Add / Edit Match</div>
+        <div class="form-card">
+          <div class="form-title">🏏 Match Details</div>
+          <input type="hidden" id="editMatchId">
+          <div class="fg"><label class="fl">Match Title</label><input type="text" class="fi" id="mTitle" placeholder="MI vs CSK – IPL 2025, Match 14"></div>
+          <div class="f2">
+            <div class="fg"><label class="fl">Team 1</label><input type="text" class="fi" id="mTeam1" placeholder="e.g. MI"></div>
+            <div class="fg"><label class="fl">Team 2</label><input type="text" class="fi" id="mTeam2" placeholder="e.g. CSK"></div>
+          </div>
+          <div class="fg"><label class="fl">Date &amp; Time</label><input type="datetime-local" class="fi" id="mDatetime"></div>
+          <div class="fg"><label class="fl">Cricbuzz / Live Score URL</label><input type="url" class="fi" id="mScoreLink" placeholder="https://www.cricbuzz.com/live-cricket-scores/..."><div class="fhint">Shown as live iframe to users on cricket page</div></div>
+          <div class="fg"><label class="fl">Status</label><select class="fsel" id="mStatus"><option value="upcoming">⏰ Upcoming</option><option value="live">🔴 Live Now</option></select><div class="fhint">Max 1 live + 2 upcoming at same time</div></div>
+        </div>
+
+        <!-- ODDS PER TEAM -->
+        <div class="odds-cashout-section">
+          <div class="ocs-title">📊 Odds Per Team (Real-time → Users see instantly)</div>
+          <div class="odds-row">
+            <div class="odds-input-wrap">
+              <div class="oiw-label" id="oddsT1Label">Team 1 Odds</div>
+              <input type="number" class="oiw-inp" id="mOdds1" value="1.90" min="1.01" max="50" step="0.01" oninput="previewOdds()">
+              <div class="oiw-sub">× multiplier</div>
+            </div>
+            <div class="odds-input-wrap">
+              <div class="oiw-label" id="oddsT2Label">Team 2 Odds</div>
+              <input type="number" class="oiw-inp" id="mOdds2" value="1.90" min="1.01" max="50" step="0.01" oninput="previewOdds()">
+              <div class="oiw-sub">× multiplier</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;" id="oddsPreview">100 coins @ 1.90x → Win: 190 coins | Profit: +90 coins</div>
+
+          <!-- CASHOUT % RANGE -->
+          <div class="ocs-title" style="margin-top:4px;">💰 Cashout % Range (Applied to Potential Win)</div>
+          <div class="cashout-row">
+            <div class="odds-input-wrap">
+              <div class="oiw-label">Min Cashout %</div>
+              <input type="number" class="oiw-inp" id="mCashoutMin" value="30" min="1" max="99" step="1">
+              <div class="oiw-sub">e.g. 30%</div>
+            </div>
+            <div class="odds-input-wrap">
+              <div class="oiw-label">Max Cashout %</div>
+              <input type="number" class="oiw-inp" id="mCashoutMax" value="70" min="1" max="99" step="1">
+              <div class="oiw-sub">e.g. 70%</div>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:8px;">
+            Cashout fluctuates between Min% and Max% of Potential Win. <strong style="color:var(--gold)">Never exceeds Potential Win.</strong>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;">
+          <button class="abtn approve" style="flex:2;" onclick="saveMatch()">💾 SAVE MATCH</button>
+          <button class="abtn" style="flex:1;background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border);" onclick="clearMatchForm()">✕ Clear</button>
+        </div>
+
+        <div class="sec-title" style="margin-top:12px;">📋 Current Matches</div>
+        <div id="matchesList"><div class="empty">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- DEPOSITS -->
+    <div id="tab-deposits" style="display:none;"><div class="section"><div class="sec-title">📥 Deposit Requests</div><div id="depositList"><div class="empty">Loading...</div></div></div></div>
+
+    <!-- WITHDRAWALS -->
+    <div id="tab-withdrawals" style="display:none;"><div class="section"><div class="sec-title">📤 Withdrawal Requests</div><div id="withdrawList"><div class="empty">Loading...</div></div></div></div>
+
+    <!-- BETS -->
+    <div id="tab-bets" style="display:none;"><div class="section"><div class="sec-title">💸 Cricket Bets</div><div id="betsList"><div class="empty">Loading...</div></div></div></div>
+
+    <!-- USERS -->
+    <div id="tab-users" style="display:none;"><div class="section"><div class="sec-title">👥 All Users</div><div id="usersList"><div class="empty">Loading...</div></div></div></div>
+
+    <!-- BALANCE -->
+    <div id="tab-balance" style="display:none;">
+      <div class="section">
+        <div class="sec-title">🪙 Manage User Balance</div>
+        <div class="bal-card">
+          <div class="fl" style="margin-bottom:8px;">Select User</div>
+          <select id="balUserSel" class="fsel" style="margin-bottom:12px;cursor:pointer;" onchange="refreshBalDisplay()"><option value="">— Select User —</option></select>
+          <div class="cur-bal" id="adminBalDisplay">🪙 —</div>
+          <div class="bal-row">
+            <input type="number" class="bal-inp" id="balAmt" placeholder="Amount" min="1">
+            <button class="badd" onclick="adjustBal(1)">+ ADD</button>
+            <button class="bsub" onclick="adjustBal(-1)">- SUB</button>
+            <button class="bset" onclick="setBalExact()">SET</button>
+          </div>
+        </div>
+        <div class="sec-title">🗑️ Danger Zone</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <button class="abtn reject" onclick="clearCol('requests','deposit')">Clear Deposit Requests</button>
+          <button class="abtn reject" onclick="clearCol('requests','withdraw')">Clear Withdrawal Requests</button>
+          <button class="abtn reject" onclick="clearCol('bets','')">Clear Cricket Bets</button>
+          <button class="abtn reject" onclick="clearCol('matches','')">Clear All Matches</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ══════════════════════════════════════════════════════
+//  FIREBASE
+// ══════════════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey:            "AIzaSyClNX5DPD55Lhj_N-UwfWtD5VssOZQZ9qw",
+  authDomain:        "lucky7-64a59.firebaseapp.com",
+  projectId:         "lucky7-64a59",
+  storageBucket:     "lucky7-64a59.firebasestorage.app",
+  messagingSenderId: "950599334529",
+  appId:             "1:950599334529:web:ca04176afa45a923532b80"
+});
+var db = firebase.firestore();
+console.log('[Admin] Firebase ready');
+
+var ADMIN_ID  = 'erotic6_4';
+var ADMIN_PWD = 'ggmmsx42{';
+
+// ══════════════════════════════════════════════════════
+//  TERMS → LOGIN FLOW (click "2026" once)
+// ══════════════════════════════════════════════════════
+function openAdminLogin() {
+  console.log('[Admin] 2026 tapped — opening login');
+  document.getElementById('termsPage').style.display   = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('adminUser').focus(); }, 150);
+}
+function backToTerms() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('termsPage').style.display   = 'flex';
+  document.getElementById('adminUser').value = '';
+  document.getElementById('adminPass').value = '';
+  document.getElementById('loginErr').textContent = '';
+}
+
+// ── Session ───────────────────────────────────────────
+var sessionStart = 0, sessTimerInterval = null;
+var loginAttempts = 0, lockUntil = 0;
+var settleMatchId = null, settleMatchData = null;
+
+(function checkSession(){
+  var raw = sessionStorage.getItem('l7_admin_sess');
+  if (!raw) return;
+  try {
+    var s = JSON.parse(raw);
+    if (s.exp > Date.now()) {
+      console.log('[Admin] Session restored');
+      document.getElementById('termsPage').style.display = 'none';
+      document.getElementById('adminUI').style.display   = 'block';
+      document.title = 'Lucky 7 – Admin Panel';
+      sessionStart = s.time;
+      startSessTimer(); initListeners();
+    } else { sessionStorage.removeItem('l7_admin_sess'); }
+  } catch(e) { sessionStorage.removeItem('l7_admin_sess'); }
+})();
+
+function doAdminLogin() {
+  var now = Date.now();
+  if (now < lockUntil) { document.getElementById('loginErr').textContent = '⏳ Locked. Try in 5 min.'; return; }
+  var u = document.getElementById('adminUser').value.trim();
+  var p = document.getElementById('adminPass').value;
+  if (u === ADMIN_ID && p === ADMIN_PWD) {
+    loginAttempts = 0;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminUI').style.display     = 'block';
+    document.title = 'Lucky 7 – Admin Panel';
+    sessionStart   = Date.now();
+    sessionStorage.setItem('l7_admin_sess', JSON.stringify({ time: sessionStart, exp: sessionStart + 3600000 }));
+    startSessTimer(); initListeners();
+    console.log('[Admin] ✅ Login OK');
+  } else {
+    loginAttempts++;
+    document.getElementById('loginErr').textContent = '❌ Wrong credentials (' + loginAttempts + '/5)';
+    if (loginAttempts >= 5) { lockUntil = Date.now() + 300000; document.getElementById('loginErr').textContent = '🚫 Locked for 5 minutes.'; }
+  }
+}
+document.addEventListener('keydown', function(e){ if (e.key === 'Enter' && document.getElementById('loginScreen').style.display === 'flex') doAdminLogin(); });
+
+function doAdminLogout() {
+  sessionStorage.removeItem('l7_admin_sess');
+  document.getElementById('adminUI').style.display   = 'none';
+  document.getElementById('termsPage').style.display = 'flex';
+  document.title = 'Lucky 7 – Terms & Policy';
+  if (sessTimerInterval) clearInterval(sessTimerInterval);
+  document.getElementById('adminUser').value = '';
+  document.getElementById('adminPass').value = '';
+}
+function startSessTimer() {
+  if (sessTimerInterval) clearInterval(sessTimerInterval);
+  sessTimerInterval = setInterval(function(){
+    var e = Math.floor((Date.now() - sessionStart) / 1000);
+    document.getElementById('sessTimer').textContent = Math.floor(e/60).toString().padStart(2,'0') + ':' + (e%60).toString().padStart(2,'0');
+    if (e >= 3600) doAdminLogout();
+  }, 1000);
+}
+
+// ══════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════
+var TABS = ['overview','matches','deposits','withdrawals','bets','users','balance'];
+function switchTab(id) {
+  TABS.forEach(function(t){ document.getElementById('tab-' + t).style.display = t === id ? 'block' : 'none'; });
+  document.querySelectorAll('.tab-btn').forEach(function(b, i){ b.classList.toggle('active', TABS[i] === id); });
+}
+
+// ══════════════════════════════════════════════════════
+//  ODDS PREVIEW (live preview in form)
+// ══════════════════════════════════════════════════════
+function previewOdds() {
+  var o1 = parseFloat(document.getElementById('mOdds1').value) || 1.9;
+  var t1 = document.getElementById('mTeam1').value || 'Team 1';
+  var t2 = document.getElementById('mTeam2').value || 'Team 2';
+  document.getElementById('oddsT1Label').textContent = t1 + ' Odds';
+  document.getElementById('oddsT2Label').textContent = t2 + ' Odds';
+  document.getElementById('oddsPreview').textContent =
+    '100 coins @ ' + o1.toFixed(2) + 'x → Win: ' + Math.floor(100 * o1) + ' coins | Profit: +' + Math.floor(100 * (o1-1)) + ' coins';
+}
+
+// ══════════════════════════════════════════════════════
+//  REALTIME LISTENERS
+// ══════════════════════════════════════════════════════
+function initListeners() {
+  console.log('[Admin] Starting onSnapshot listeners...');
+
+  // USERS
+  db.collection('users').onSnapshot(function(snap){
+    document.getElementById('stUsers').innerHTML = snap.size + '<span class="ping"></span>';
+    renderUsers(snap.docs);
+    var sel = document.getElementById('balUserSel'), cur = sel.value;
+    sel.innerHTML = '<option value="">— Select User —</option>';
+    snap.docs.forEach(function(d){ var u = d.data(); var o = document.createElement('option'); o.value = d.id; o.textContent = u.username + ' (🪙' + (u.wallet||0) + ')'; sel.appendChild(o); });
+    if (cur) sel.value = cur;
+  }, function(err){ console.error('[Admin] Users:', err.message); });
+
+  // DEPOSITS
+  db.collection('requests').where('type','==','deposit').orderBy('createdAt','desc')
+    .onSnapshot(function(snap){
+      document.getElementById('stDepPend').textContent = snap.docs.filter(function(d){ return d.data().status === 'pending'; }).length;
+      renderRequests(snap.docs, 'depositList', 'deposit');
+    }, function(err){ console.error('[Admin] Deposits:', err.message); });
+
+  // WITHDRAWALS
+  db.collection('requests').where('type','==','withdraw').orderBy('createdAt','desc')
+    .onSnapshot(function(snap){
+      document.getElementById('stWdPend').textContent = snap.docs.filter(function(d){ return d.data().status === 'pending'; }).length;
+      renderRequests(snap.docs, 'withdrawList', 'withdraw');
+    }, function(err){ console.error('[Admin] Withdrawals:', err.message); });
+
+  // BETS
+  db.collection('bets').orderBy('createdAt','desc')
+    .onSnapshot(function(snap){
+      document.getElementById('stBetsPend').textContent = snap.docs.filter(function(d){ return d.data().status === 'pending'; }).length;
+      renderBets(snap.docs);
+    }, function(err){ console.error('[Admin] Bets:', err.message); });
+
+  // MATCHES
+  db.collection('matches').orderBy('createdAt','desc')
+    .onSnapshot(function(snap){
+      var liveM = snap.docs.find(function(d){ return d.data().status === 'live'; });
+      document.getElementById('stLive').textContent = liveM ? liveM.data().team1 + ' vs ' + liveM.data().team2 : 'No live match';
+      renderMatches(snap.docs);
+    }, function(err){ console.error('[Admin] Matches:', err.message); });
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER USERS
+// ══════════════════════════════════════════════════════
+function renderUsers(docs) {
+  var list = document.getElementById('usersList'); if (!list) return;
+  if (!docs.length) { list.innerHTML = '<div class="empty">No users yet</div>'; return; }
+  list.innerHTML = '';
+  docs.forEach(function(d){
+    var u = d.data(), uid = d.id;
+    var el = document.createElement('div'); el.className = 'user-card';
+    el.innerHTML = '<div class="uh"><div><div class="un">👤 ' + u.username + '</div><div class="us">📱 +91' + u.phone + ' | Joined: ' + (u.joinDate||'—') + '</div></div><div class="ub">🪙' + (u.wallet||0) + '</div></div>'
+      + '<div class="ua">'
+      + '<button class="uabtn uadd" onclick="quickCoin(\'' + uid + '\',100)">+100</button>'
+      + '<button class="uabtn uadd" onclick="quickCoin(\'' + uid + '\',500)">+500</button>'
+      + '<button class="uabtn usub" onclick="quickCoin(\'' + uid + '\',-100)">-100</button>'
+      + '<button class="uabtn umanage" onclick="goBalance(\'' + uid + '\')">Manage</button>'
+      + '</div>';
+    list.appendChild(el);
+  });
+}
+function quickCoin(uid, amt) {
+  db.collection('users').doc(uid).update({ wallet: firebase.firestore.FieldValue.increment(amt) })
+    .then(function(){ showToast((amt>0?'+':'') + amt + ' coins updated', 'ok'); })
+    .catch(function(e){ showToast('Error: ' + e.message, 'err'); });
+}
+function goBalance(uid) { document.getElementById('balUserSel').value = uid; switchTab('balance'); refreshBalDisplay(); }
+
+// ══════════════════════════════════════════════════════
+//  RENDER REQUESTS
+// ══════════════════════════════════════════════════════
+function renderRequests(docs, listId, type) {
+  var list = document.getElementById(listId); if (!list) return;
+  if (!docs.length) { list.innerHTML = '<div class="empty">No ' + type + ' requests yet</div>'; return; }
+  list.innerHTML = '';
+  docs.forEach(function(d){
+    var r = d.data(), rid = d.id;
+    var ts = r.createdAt ? r.createdAt.toDate().toLocaleString() : '—';
+    var body = type === 'deposit'
+      ? '<div class="crow"><span class="clbl">Amount</span><span class="cval" style="color:var(--green)">₹' + r.amount + '</span></div><div class="crow"><span class="clbl">UTR/TXN</span><span class="cval">' + (r.txnId||'—') + '</span></div>'
+      : '<div class="crow"><span class="clbl">Coins</span><span class="cval" style="color:var(--blue)">🪙' + r.amount + '</span></div><div class="crow"><span class="clbl">UPI</span><span class="cval">' + (r.upi||'—') + '</span></div><div class="crow"><span class="clbl">Name</span><span class="cval">' + (r.name||'—') + '</span></div>';
+    var el = document.createElement('div'); el.className = 'card';
+    el.innerHTML = '<div class="card-top"><div class="card-id">User: ' + (r.username||r.userId||'—') + '</div><span class="sbadge sb-' + r.status + '">' + r.status.toUpperCase() + '</span></div>'
+      + '<div class="card-body">' + body + '<div class="crow"><span class="clbl">Time</span><span class="cval">' + ts + '</span></div></div>'
+      + (r.status === 'pending'
+          ? '<div class="actions"><button class="abtn approve" onclick="approveReq(\'' + rid + '\',\'' + type + '\',\'' + r.userId + '\',' + r.amount + ')">✅ APPROVE</button><button class="abtn reject" onclick="rejectReq(\'' + rid + '\',\'' + type + '\',\'' + r.userId + '\',' + r.amount + ')">❌ REJECT</button></div>'
+          : '<div style="font-size:11px;color:var(--muted)">Processed</div>');
+    list.appendChild(el);
+  });
+}
+function approveReq(id, type, userId, amount) {
+  var batch = db.batch();
+  batch.update(db.collection('requests').doc(id), { status: 'approved', processedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  if (type === 'deposit') batch.update(db.collection('users').doc(userId), { wallet: firebase.firestore.FieldValue.increment(amount) });
+  batch.commit()
+    .then(function(){ showToast(type === 'deposit' ? '✅ Approved — 🪙' + amount + ' added' : '✅ Marked paid', 'ok'); })
+    .catch(function(e){ showToast('Error: ' + e.message, 'err'); });
+}
+function rejectReq(id, type, userId, amount) {
+  var batch = db.batch();
+  batch.update(db.collection('requests').doc(id), { status: 'rejected', processedAt: firebase.firestore.FieldValue.serverTimestamp() });
+  if (type === 'withdraw') batch.update(db.collection('users').doc(userId), { wallet: firebase.firestore.FieldValue.increment(amount) });
+  batch.commit()
+    .then(function(){ showToast(type === 'withdraw' ? '❌ Rejected — 🪙' + amount + ' refunded' : '❌ Deposit rejected', 'err'); })
+    .catch(function(e){ showToast('Error: ' + e.message, 'err'); });
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER BETS — shows odds, cashout info
+// ══════════════════════════════════════════════════════
+function renderBets(docs) {
+  var list = document.getElementById('betsList'); if (!list) return;
+  if (!docs.length) { list.innerHTML = '<div class="empty">No cricket bets yet</div>'; return; }
+  list.innerHTML = '';
+  docs.forEach(function(d){
+    var b = d.data(), ts = b.createdAt ? b.createdAt.toDate().toLocaleString() : '—';
+    var potWin = b.potentialWin || (b.amount + b.potentialProfit);
+    var statusColor = b.status === 'won' ? 'var(--green)' : b.status === 'lost' ? 'var(--red)' : b.status === 'cashout' ? 'var(--gold)' : 'var(--orange)';
+    var el = document.createElement('div'); el.className = 'card';
+    el.innerHTML = '<div class="card-top"><div class="card-id">' + (b.matchTitle||b.matchId||'—') + '</div><span class="sbadge sb-' + b.status + '">' + b.status.toUpperCase() + '</span></div>'
+      + '<div class="card-body">'
+      + '<div class="crow"><span class="clbl">User</span><span class="cval">' + (b.username||b.userId||'—') + '</span></div>'
+      + '<div class="crow"><span class="clbl">Team</span><span class="cval">' + (b.selectedTeam||'—') + '</span></div>'
+      + '<div class="crow"><span class="clbl">Odds</span><span class="cval" style="color:var(--blue)">' + (b.odds||b.entryOdds||0).toFixed(2) + 'x</span></div>'
+      + '<div class="crow"><span class="clbl">Stake</span><span class="cval">🪙' + (b.amount||0) + '</span></div>'
+      + '<div class="crow"><span class="clbl">Pot. Win</span><span class="cval" style="color:var(--green)">🪙' + potWin + '</span></div>'
+      + (b.status === 'cashout' ? '<div class="crow"><span class="clbl">Cashout Got</span><span class="cval" style="color:var(--gold)">🪙' + (b.settledAmount||0) + ' (' + (b.cashoutPct||0) + '%)</span></div>' : '')
+      + '<div class="crow"><span class="clbl">Time</span><span class="cval">' + ts + '</span></div>'
+      + '</div>';
+    list.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  MATCHES — save with odds + cashout range
+// ══════════════════════════════════════════════════════
+function saveMatch() {
+  var title      = document.getElementById('mTitle').value.trim();
+  var team1      = document.getElementById('mTeam1').value.trim();
+  var team2      = document.getElementById('mTeam2').value.trim();
+  var datetime   = document.getElementById('mDatetime').value;
+  var scoreLink  = document.getElementById('mScoreLink').value.trim();
+  var status     = document.getElementById('mStatus').value;
+  var editId     = document.getElementById('editMatchId').value;
+  var odds1      = parseFloat(document.getElementById('mOdds1').value) || 1.90;
+  var odds2      = parseFloat(document.getElementById('mOdds2').value) || 1.90;
+  var cashoutMin = parseInt(document.getElementById('mCashoutMin').value) || 30;
+  var cashoutMax = parseInt(document.getElementById('mCashoutMax').value) || 70;
+
+  if (!title || !team1 || !team2) { showToast('Fill Title, Team 1 and Team 2', 'err'); return; }
+  if (odds1 < 1.01 || odds2 < 1.01) { showToast('Odds must be at least 1.01x', 'err'); return; }
+  if (cashoutMin >= cashoutMax) { showToast('Min cashout % must be less than Max', 'err'); return; }
+
+  db.collection('matches').get().then(function(snap){
+    var existing   = snap.docs.filter(function(d){ return d.id !== editId; });
+    var liveCount  = existing.filter(function(d){ return d.data().status === 'live'; }).length;
+    var upcomCount = existing.filter(function(d){ return d.data().status === 'upcoming'; }).length;
+    if (status === 'live'     && liveCount  >= 1) { showToast('Only 1 live match at a time!', 'err'); return; }
+    if (status === 'upcoming' && upcomCount >= 2) { showToast('Max 2 upcoming matches!', 'err'); return; }
+
+    var data = {
+      title: title, team1: team1, team2: team2,
+      datetime: datetime, scoreLink: scoreLink, status: status,
+      winner: null, updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      // ODDS — stored in Firestore, read in real-time by cricket.html
+      odds: { team1Odds: odds1, team2Odds: odds2 },
+      // CASHOUT RANGE
+      cashoutMin: cashoutMin, cashoutMax: cashoutMax
+    };
+    var p = editId
+      ? db.collection('matches').doc(editId).update(data)
+      : (data.createdAt = firebase.firestore.FieldValue.serverTimestamp(), db.collection('matches').add(data));
+    p.then(function(){
+      showToast(editId ? '✅ Match updated! Odds + cashout range synced to users.' : '✅ Match added! Users can see it now.', 'ok');
+      clearMatchForm();
+    }).catch(function(e){ showToast('Error: ' + e.message, 'err'); });
+  });
+}
+
+function clearMatchForm() {
+  ['editMatchId','mTitle','mTeam1','mTeam2','mDatetime','mScoreLink'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('mStatus').value    = 'upcoming';
+  document.getElementById('mOdds1').value     = '1.90';
+  document.getElementById('mOdds2').value     = '1.90';
+  document.getElementById('mCashoutMin').value = '30';
+  document.getElementById('mCashoutMax').value = '70';
+  document.getElementById('oddsT1Label').textContent = 'Team 1 Odds';
+  document.getElementById('oddsT2Label').textContent = 'Team 2 Odds';
+  previewOdds();
+}
+
+function editMatch(id) {
+  db.collection('matches').doc(id).get().then(function(snap){
+    if (!snap.exists) return;
+    var m = snap.data();
+    document.getElementById('editMatchId').value  = id;
+    document.getElementById('mTitle').value       = m.title     || '';
+    document.getElementById('mTeam1').value       = m.team1     || '';
+    document.getElementById('mTeam2').value       = m.team2     || '';
+    document.getElementById('mDatetime').value    = m.datetime  || '';
+    document.getElementById('mScoreLink').value   = m.scoreLink || '';
+    document.getElementById('mStatus').value      = m.status    || 'upcoming';
+    document.getElementById('mOdds1').value       = (m.odds && m.odds.team1Odds) || '1.90';
+    document.getElementById('mOdds2').value       = (m.odds && m.odds.team2Odds) || '1.90';
+    document.getElementById('mCashoutMin').value  = m.cashoutMin != null ? m.cashoutMin : 30;
+    document.getElementById('mCashoutMax').value  = m.cashoutMax != null ? m.cashoutMax : 70;
+    document.getElementById('oddsT1Label').textContent = (m.team1 || 'Team 1') + ' Odds';
+    document.getElementById('oddsT2Label').textContent = (m.team2 || 'Team 2') + ' Odds';
+    previewOdds();
+    document.getElementById('tab-matches').scrollIntoView({ behavior: 'smooth' });
+    switchTab('matches');
+  });
+}
+
+function setMatchStatus(id, status) {
+  if (status === 'live') {
+    db.collection('matches').where('status', '==', 'live').get().then(function(snap){
+      if (snap.docs.filter(function(d){ return d.id !== id; }).length >= 1) { showToast('Only 1 live match at a time!', 'err'); return; }
+      db.collection('matches').doc(id).update({ status: 'live' }).then(function(){ showToast('Match is now 🔴 LIVE', 'ok'); });
+    });
+  } else {
+    db.collection('matches').doc(id).update({ status: status }).then(function(){ showToast('Status updated', 'ok'); });
+  }
+}
+
+function deleteMatch(id) {
+  if (!confirm('Delete this match? Cannot be undone.')) return;
+  db.collection('matches').doc(id).delete().then(function(){ showToast('Match deleted', 'err'); });
+}
+
+function openSettle(id) {
+  db.collection('matches').doc(id).get().then(function(snap){
+    if (!snap.exists) return;
+    settleMatchId   = id;
+    settleMatchData = snap.data();
+    document.getElementById('settleMatchName').textContent = settleMatchData.title || settleMatchData.team1 + ' vs ' + settleMatchData.team2;
+    document.getElementById('settleT1Btn').textContent     = '🏆 ' + settleMatchData.team1 + ' WON';
+    document.getElementById('settleT2Btn').textContent     = '🏆 ' + settleMatchData.team2 + ' WON';
+    document.getElementById('settleOverlay').classList.add('open');
+  });
+}
+function closeSettle() { document.getElementById('settleOverlay').classList.remove('open'); settleMatchId = null; }
+
+function declareWinner(winnerKey) {
+  if (!settleMatchId) return;
+  var winnerName = winnerKey === 'team1' ? settleMatchData.team1 : settleMatchData.team2;
+  console.log('[Admin] Declaring winner:', winnerName);
+  db.collection('bets').where('matchId', '==', settleMatchId).where('status', '==', 'pending').get()
+    .then(function(betSnap){
+      var batch = db.batch(), wins = 0, losses = 0;
+      betSnap.docs.forEach(function(betDoc){
+        var bet = betDoc.data();
+        if (bet.selectedTeamKey === winnerKey) {
+          // WON — credit stake + profit
+          batch.update(db.collection('bets').doc(betDoc.id), { status: 'won', settledAt: firebase.firestore.FieldValue.serverTimestamp() });
+          var potWin = bet.potentialWin || (bet.amount + bet.potentialProfit);
+          batch.update(db.collection('users').doc(bet.userId), { wallet: firebase.firestore.FieldValue.increment(potWin) });
+          wins++;
+        } else {
+          // LOST — stake already deducted at bet time
+          batch.update(db.collection('bets').doc(betDoc.id), { status: 'lost', settledAt: firebase.firestore.FieldValue.serverTimestamp() });
+          losses++;
+        }
+      });
+      batch.update(db.collection('matches').doc(settleMatchId), {
+        status: 'completed', winner: winnerName, completedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return batch.commit().then(function(){
+        closeSettle();
+        showToast('✅ ' + winnerName + ' declared! ' + wins + ' won, ' + losses + ' lost.', 'ok');
+      });
+    }).catch(function(e){ showToast('Error: ' + e.message, 'err'); });
+}
+
+function renderMatches(docs) {
+  var list = document.getElementById('matchesList'); if (!list) return;
+  if (!docs.length) { list.innerHTML = '<div class="empty">No matches yet. Add one above.</div>'; return; }
+  list.innerHTML = '';
+  docs.forEach(function(d){
+    var m = d.data(), mid = d.id;
+    var badge = m.status === 'live'
+      ? '<span class="status-live">LIVE</span>'
+      : m.status === 'upcoming'
+        ? '<span class="status-upcoming">⏰ UPCOMING</span>'
+        : '<span class="sbadge sb-approved">✅ DONE</span>';
+    var dt   = m.datetime ? new Date(m.datetime).toLocaleString() : 'No date';
+    var o1   = (m.odds && m.odds.team1Odds) ? parseFloat(m.odds.team1Odds).toFixed(2) : '1.90';
+    var o2   = (m.odds && m.odds.team2Odds) ? parseFloat(m.odds.team2Odds).toFixed(2) : '1.90';
+    var cMin = m.cashoutMin != null ? m.cashoutMin : 30;
+    var cMax = m.cashoutMax != null ? m.cashoutMax : 70;
+    var el = document.createElement('div'); el.className = 'match-card';
+    el.innerHTML = ''
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+      +   '<div><div class="mc-title">' + (m.title || m.team1 + ' vs ' + m.team2) + '</div>'
+      +   '<div class="mc-teams">' + m.team1 + ' vs ' + m.team2 + ' | ' + dt + '</div></div>' + badge
+      + '</div>'
+      // ODDS CHIPS
+      + '<div class="mc-odds-row">'
+      +   '<span class="mc-odds-chip">' + m.team1 + ': ' + o1 + 'x</span>'
+      +   '<span class="mc-odds-chip">' + m.team2 + ': ' + o2 + 'x</span>'
+      +   '<span class="mc-cashout-chip">Cashout: ' + cMin + '–' + cMax + '%</span>'
+      + '</div>'
+      + (m.scoreLink ? '<div style="font-size:10px;color:var(--blue);word-break:break-all;margin:4px 0;">' + m.scoreLink.substring(0,60) + (m.scoreLink.length > 60 ? '...' : '') + '</div>' : '')
+      + (m.winner ? '<div style="font-size:11px;color:var(--gold);margin-bottom:6px;">🏆 Winner: ' + m.winner + '</div>' : '')
+      + '<div class="mc-actions">'
+      +   (m.status !== 'live' && m.status !== 'completed' ? '<button class="mc-btn btn-live" onclick="setMatchStatus(\'' + mid + '\',\'live\')">🔴 Set LIVE</button>' : '')
+      +   (m.status === 'live' ? '<button class="mc-btn btn-upcoming" onclick="setMatchStatus(\'' + mid + '\',\'upcoming\')">⏰ Upcoming</button>' : '')
+      +   (m.status !== 'completed' ? '<button class="mc-btn btn-settle" onclick="openSettle(\'' + mid + '\')">🏆 Declare Winner</button>' : '')
+      +   '<button class="mc-btn btn-edit" onclick="editMatch(\'' + mid + '\')">✏️ Edit</button>'
+      +   '<button class="mc-btn btn-del"  onclick="deleteMatch(\'' + mid + '\')">🗑️</button>'
+      + '</div>';
+    list.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  BALANCE
+// ══════════════════════════════════════════════════════
+function refreshBalDisplay() {
+  var uid = document.getElementById('balUserSel').value;
+  if (!uid) { document.getElementById('adminBalDisplay').textContent = '🪙 —'; return; }
+  db.collection('users').doc(uid).get().then(function(snap){
+    document.getElementById('adminBalDisplay').textContent = '🪙 ' + (snap.exists ? snap.data().wallet || 0 : '—');
+  });
+}
+function getSelUid() { var uid = document.getElementById('balUserSel').value; if (!uid) { showToast('Select a user first', 'info'); return null; } return uid; }
+function adjustBal(sign) {
+  var uid = getSelUid(); if (!uid) return;
+  var amt = parseInt(document.getElementById('balAmt').value) || 0;
+  if (amt <= 0) { showToast('Enter valid amount', 'err'); return; }
+  db.collection('users').doc(uid).update({ wallet: firebase.firestore.FieldValue.increment(sign * amt) })
+    .then(function(){ refreshBalDisplay(); showToast((sign > 0 ? '+' : '-') + amt + ' coins applied', 'ok'); })
+    .catch(function(e){ showToast('Error: ' + e.message, 'err'); });
+}
+function setBalExact() {
+  var uid = getSelUid(); if (!uid) return;
+  var amt = parseInt(document.getElementById('balAmt').value);
+  if (isNaN(amt)) { showToast('Enter valid amount', 'err'); return; }
+  db.collection('users').doc(uid).update({ wallet: amt })
+    .then(function(){ refreshBalDisplay(); showToast('Balance set to ' + amt, 'ok'); })
+    .catch(function(e){ showToast('Error: ' + e.message, 'err'); });
+}
+
+// ══════════════════════════════════════════════════════
+//  CLEAR COLLECTIONS
+// ══════════════════════════════════════════════════════
+function clearCol(colName, typeFilter) {
+  if (!confirm('Clear all ' + (typeFilter || colName) + '? This cannot be undone.')) return;
+  var ref = typeFilter ? db.collection(colName).where('type', '==', typeFilter) : db.collection(colName);
+  ref.get().then(function(snap){
+    var batch = db.batch();
+    snap.docs.forEach(function(d){ batch.delete(d.ref); });
+    return batch.commit();
+  }).then(function(){ showToast('Cleared', 'ok'); }).catch(function(e){ showToast('Error: ' + e.message, 'err'); });
+}
+
+// ══════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type + ' show';
+  setTimeout(function(){ t.className = 'toast'; }, 3000);
+}
+</script>
+</body>
+</html>
