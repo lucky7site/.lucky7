@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cricket Trading – Lucky 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050508;--green:#00ff88;--purple:#b44fff;--blue:#00c8ff;
+  --red:#ff4466;--gold:#ffd700;--orange:#ff8c00;--text:#e8eaf0;
+  --muted:#7a7d8e;--border:rgba(255,255,255,0.08);--card:rgba(255,255,255,0.04);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(0,255,136,0.07),transparent 60%);pointer-events:none;z-index:0;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:rgba(5,5,8,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+.back-btn{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--text);}
+.page-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:800;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.balance-chip{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:18px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--green);}
+main{position:relative;z-index:1;padding-bottom:40px;}
+.section{padding:12px 12px 0;}
+.sec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;}
+.match-scroll{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;}
+.match-scroll::-webkit-scrollbar{display:none;}
+.match-pill{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:10px 13px;cursor:pointer;transition:.2s;min-width:160px;}
+.match-pill.active{border-color:var(--green);background:rgba(0,255,136,0.06);}
+.match-pill:active{transform:scale(0.95);}
+.mp-teams{font-size:11px;font-weight:700;}
+.mp-info{font-size:10px;color:var(--muted);margin-top:2px;}
+.mp-status{display:inline-flex;align-items:center;gap:4px;font-size:9px;margin-top:5px;font-weight:700;}
+.mp-status.live,.mp-status.open{color:var(--green);}
+.mp-status.live::before,.mp-status.open::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.mp-status.upcoming{color:var(--orange);}
+.mp-status.closed,.mp-status.completed{color:var(--gold);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* LIVE SCORE STRIP */
+.live-score-strip{margin:12px 12px 0;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.14);border-radius:14px;padding:11px 13px;display:none;}
+.ls-row{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.ls-team-block{flex:1;}
+.ls-team-block.right{text-align:right;}
+.ls-team-name{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.ls-score{font-size:16px;font-weight:800;color:var(--text);}
+.ls-over{font-size:10px;color:var(--blue);}
+.ls-vs{font-size:10px;color:var(--muted);padding:0 6px;}
+.ls-meta{font-size:10px;color:var(--orange);font-weight:600;margin-top:6px;text-align:center;}
+.ls-rr-row{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;}
+.ls-chip{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:5px 7px;text-align:center;min-width:72px;}
+.ls-chip-val{font-size:12px;font-weight:700;color:var(--blue);}
+.ls-chip-lbl{font-size:9px;color:var(--muted);margin-top:1px;}
+.ls-updated{font-size:9px;color:var(--muted);opacity:.7;text-align:right;margin-top:5px;}
+
+/* SCOREBOARD */
+.scoreboard-wrap{margin:12px;border-radius:18px;overflow:hidden;border:1px solid var(--border);background:rgba(255,255,255,0.03);}
+.sb-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);}
+.sb-match-name{font-size:12px;font-weight:700;}
+.sb-badge-live{background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.28);border-radius:18px;padding:3px 9px;font-size:9px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:3px;}
+.sb-badge-live::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.score-iframe-wrap{width:100%;height:200px;background:#0a0a12;}
+.score-iframe{width:100%;height:100%;border:none;display:block;}
+
+/* ODDS BANNER */
+.odds-banner{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px;margin-top:0;}
+.odds-tile{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:13px 14px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.odds-tile:active{transform:scale(0.96);}
+.odds-tile.selected{border-color:var(--blue);background:rgba(0,150,255,0.1);}
+.odds-tile.selected::before{content:'✓';position:absolute;top:7px;right:9px;font-size:10px;color:var(--blue);font-weight:900;}
+.odds-tile.odds-up  {animation:flashGreen .45s ease;}
+.odds-tile.odds-down{animation:flashRed   .45s ease;}
+@keyframes flashGreen{0%{background:rgba(0,255,136,0.2);border-color:rgba(0,255,136,0.6);}100%{background:var(--card);border-color:var(--border);}}
+@keyframes flashRed  {0%{background:rgba(255,68,102,0.2);border-color:rgba(255,68,102,0.6);}100%{background:var(--card);border-color:var(--border);}}
+.ot-team{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ot-odds{font-size:22px;font-weight:900;color:var(--blue);}
+.ot-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.ot-pot{font-size:11px;color:var(--green);margin-top:4px;font-weight:700;}
+.ot-change{font-size:10px;font-weight:700;margin-top:2px;}
+.ot-change.up  {color:var(--green);}
+.ot-change.down{color:var(--red);}
+.ot-change.flat{color:var(--muted);}
+.odds-source-row{display:flex;justify-content:center;align-items:center;gap:5px;margin:-4px 12px 8px;font-size:9px;color:var(--muted);}
+.odds-src-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;}
+
+/* TABS */
+.tabs{display:flex;gap:0;margin:12px;background:rgba(255,255,255,0.04);border-radius:13px;padding:3px;}
+.tab{flex:1;padding:9px 0;text-align:center;font-size:10px;font-weight:700;cursor:pointer;border-radius:10px;transition:.2s;color:var(--muted);}
+.tab.active{background:linear-gradient(135deg,rgba(0,255,136,0.18),rgba(0,200,255,0.1));color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+
+/* BET PANEL */
+.bet-panel{padding:0 12px;}
+.bet-card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:15px;margin-bottom:11px;}
+.bc-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.stake-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;}
+.stake-row{display:flex;gap:7px;align-items:center;}
+.stake-input{background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-size:14px;font-weight:700;width:110px;outline:none;text-align:center;font-family:'Poppins',sans-serif;}
+.stake-input:focus{border-color:var(--green);}
+.qb-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+.qb{border:1px solid var(--border);border-radius:7px;padding:4px 10px;background:rgba(255,255,255,0.04);font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);}
+.qb:active{background:rgba(255,255,255,.1);}
+.pnl-block{margin-top:10px;background:rgba(255,255,255,0.03);border-radius:10px;padding:11px 13px;}
+.pnl-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.pnl-row:last-child{margin-bottom:0;}
+.pnl-lbl{color:var(--muted);}
+.pnl-val{font-weight:700;}
+.place-btn{width:100%;border:none;border-radius:12px;padding:14px;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s;background:linear-gradient(90deg,#0055aa,var(--blue));color:#000;font-family:'Poppins',sans-serif;}
+.place-btn:active{transform:scale(.97);}
+.place-btn:disabled{opacity:.4;pointer-events:none;}
+.live-bet-card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:15px;margin-bottom:11px;}
+.lbc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.lbc-match{font-size:10px;color:var(--muted);}
+.lbc-team{font-size:14px;font-weight:700;margin:3px 0;}
+.lbc-status{font-size:9px;font-weight:700;color:var(--green);background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:2px 7px;}
+.lbc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0;}
+.lbc-item{background:rgba(255,255,255,0.03);border-radius:9px;padding:8px;text-align:center;}
+.lbc-val{font-size:13px;font-weight:700;}
+.lbc-lbl{font-size:9px;color:var(--muted);margin-top:2px;}
+.cashout-box{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:12px;margin-top:8px;}
+.co-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.co-label{font-size:11px;color:var(--muted);}
+.co-val{font-size:16px;font-weight:800;color:var(--gold);}
+.co-pct{font-size:10px;color:var(--muted);}
+.cashout-btn{width:100%;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#006644,var(--green));color:#000;transition:.2s;font-family:'Poppins',sans-serif;margin-top:8px;}
+.cashout-btn:active{transform:scale(.97);}
+.cashout-btn:disabled{opacity:0.4;pointer-events:none;}
+.co-warning{font-size:10px;color:var(--muted);text-align:center;margin-top:5px;}
+.hist-sec{padding:0 12px 14px;}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;}
+.hi-match{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.hi-team{font-size:13px;font-weight:700;margin-bottom:2px;}
+.hi-odds{font-size:11px;color:var(--blue);}
+.hi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;}
+.hi-cell-val{font-size:12px;font-weight:700;}
+.hi-cell-lbl{font-size:9px;color:var(--muted);margin-top:2px;}
+.hi-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.hi-time{font-size:10px;color:var(--muted);}
+.status-badge{font-size:11px;font-weight:700;border-radius:8px;padding:3px 10px;}
+.sb-active {background:rgba(0,200,255,0.1); color:var(--blue);   border:1px solid rgba(0,200,255,0.2);}
+.sb-won    {background:rgba(0,255,136,0.1); color:var(--green);  border:1px solid rgba(0,255,136,0.2);}
+.sb-lost   {background:rgba(255,68,102,0.1);color:var(--red);    border:1px solid rgba(255,68,102,0.2);}
+.sb-cashout{background:rgba(255,215,0,0.1); color:var(--gold);   border:1px solid rgba(255,215,0,0.2);}
+.empty-state{text-align:center;padding:36px 20px;color:var(--muted);font-size:13px;line-height:1.6;}
+.toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(10,10,20,.97);border:1px solid var(--border);border-radius:13px;padding:9px 18px;font-size:13px;font-weight:600;z-index:500;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;font-family:'Poppins',sans-serif;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win {border-color:var(--green);color:var(--green);}
+.toast.lose{border-color:var(--red);  color:var(--red);}
+.toast.info{border-color:var(--blue); color:var(--blue);}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="back-btn" onclick="location.href='index.html'">←</div>
+  <div class="page-title">🏏 Cricket Trading</div>
+  <div class="balance-chip" id="balChip">🪙 0</div>
+</header>
+
+<main>
+  <div class="section">
+    <div class="sec-label">Select Match</div>
+    <div class="match-scroll" id="matchScroll">
+      <div style="padding:14px;color:var(--muted);font-size:12px;">Loading matches...</div>
+    </div>
+  </div>
+
+  <!-- LIVE SCORE STRIP -->
+  <div class="live-score-strip" id="liveScoreStrip">
+    <div class="ls-row">
+      <div class="ls-team-block">
+        <div class="ls-team-name" id="ls-t1name">—</div>
+        <div class="ls-score"     id="ls-t1score">—</div>
+        <div class="ls-over"      id="ls-t1over"></div>
+      </div>
+      <div class="ls-vs">VS</div>
+      <div class="ls-team-block right">
+        <div class="ls-team-name" id="ls-t2name">—</div>
+        <div class="ls-score"     id="ls-t2score">—</div>
+        <div class="ls-over"      id="ls-t2over"></div>
+      </div>
+    </div>
+    <div class="ls-meta" id="ls-meta"></div>
+    <div class="ls-rr-row">
+      <div class="ls-chip"><div class="ls-chip-val" id="ls-crr">—</div><div class="ls-chip-lbl">Curr RR</div></div>
+      <div class="ls-chip"><div class="ls-chip-val" id="ls-rrr">—</div><div class="ls-chip-lbl">Req RR</div></div>
+      <div class="ls-chip"><div class="ls-chip-val" id="ls-wkts">—</div><div class="ls-chip-lbl">Wickets</div></div>
+      <div class="ls-chip"><div class="ls-chip-val" id="ls-overs">—</div><div class="ls-chip-lbl">Overs</div></div>
+    </div>
+    <div class="ls-updated" id="ls-updated">Fetching live data…</div>
+  </div>
+
+  <div class="scoreboard-wrap" id="scoreboardWrap">
+    <div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;">Select a match to view scoreboard</div>
+  </div>
+
+  <div class="odds-banner" id="oddsBanner" style="display:none;">
+    <div class="odds-tile" id="oddsT1" onclick="selTeam('team1')">
+      <div class="ot-team"   id="ot1Name">Team 1</div>
+      <div class="ot-odds"   id="ot1Odds">—</div>
+      <div class="ot-sub">Tap to back</div>
+      <div class="ot-pot"    id="ot1Pot"></div>
+      <div class="ot-change flat" id="ot1Change">—</div>
+    </div>
+    <div class="odds-tile" id="oddsT2" onclick="selTeam('team2')">
+      <div class="ot-team"   id="ot2Name">Team 2</div>
+      <div class="ot-odds"   id="ot2Odds">—</div>
+      <div class="ot-sub">Tap to back</div>
+      <div class="ot-pot"    id="ot2Pot"></div>
+      <div class="ot-change flat" id="ot2Change">—</div>
+    </div>
+  </div>
+  <div class="odds-source-row" id="oddsSourceRow" style="display:none;">
+    <div class="odds-src-dot"></div>
+    <span id="oddsSourceLabel">Live odds</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-trade" onclick="switchTab('trade')">PLACE BET</div>
+    <div class="tab"        id="tab-live"  onclick="switchTab('live')">LIVE BETS</div>
+    <div class="tab"        id="tab-hist"  onclick="switchTab('hist')">HISTORY</div>
+  </div>
+
+  <div id="panel-trade" class="bet-panel">
+    <div id="tradeInner"><div class="empty-state">Select a live match and tap a team's odds to place a bet</div></div>
+  </div>
+  <div id="panel-live" class="bet-panel" style="display:none;">
+    <div id="liveBetsList"><div class="empty-state">No active bets.<br>Go to Place Bet to trade.</div></div>
+  </div>
+  <div id="panel-hist" class="hist-sec" style="display:none;">
+    <div id="histList"><div class="empty-state">No bet history yet</div></div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════
+var RAPIDAPI_KEY  = '8facfecc65msh5f0e67649bb7612p12f979jsnbf4fb5db8343';
+var RAPIDAPI_HOST = 'cricket-api-free-data.p.rapidapi.com';
+var API_BASE      = 'https://' + RAPIDAPI_HOST;
+var POLL_MS       = 30000;  // 30 s — safe for free tier (avoid rate limits)
+
+firebase.initializeApp({
+  apiKey:'AIzaSyClNX5DPD55Lhj_N-UwfWtD5VssOZQZ9qw',
+  authDomain:'lucky7-64a59.firebaseapp.com',
+  projectId:'lucky7-64a59',
+  storageBucket:'lucky7-64a59.firebasestorage.app',
+  messagingSenderId:'950599334529',
+  appId:'1:950599334529:web:ca04176afa45a923532b80'
+});
+var db   = firebase.firestore();
+var auth = firebase.auth();
+
+// ═══════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════
+var currentUser = null;
+var balance     = 0;
+var unsubUser   = null;
+
+function initWithUser(uid, name) {
+  currentUser = { id: uid, username: name || 'Player' };
+  if (unsubUser) unsubUser();
+  unsubUser = db.collection('users').doc(uid).onSnapshot(function(snap) {
+    if (!snap.exists) return;
+    var d = snap.data();
+    balance = d.walletBalance !== undefined ? (d.walletBalance || 0) : (d.wallet || 0);
+    localStorage.setItem('l7_balance', String(balance));
+    document.getElementById('balChip').textContent = '🪙 ' + balance;
+  });
+  startApp();
+}
+
+auth.onAuthStateChanged(function(u) {
+  if (u) { initWithUser(u.uid, u.displayName || u.email); return; }
+  var s = localStorage.getItem('l7_current_user');
+  if (s) { try { var p=JSON.parse(s); if(p&&p.id){initWithUser(p.id,p.username);return;} }catch(e){} }
+  location.replace('login.html');
+});
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+var allMatches    = [];
+var selectedMatch = null;
+var selectedTeam  = null;
+var liveBets      = [];
+var cashoutTimers = {};
+var cashoutValues = {};
+var notifiedBets  = {};
+
+// Live odds object — single source of truth for displayed odds
+var liveOdds = { team1:1.90, team2:1.90, prevTeam1:1.90, prevTeam2:1.90,
+                 anchor1:1.90, anchor2:1.90, source:'admin' };
+
+var scorePoller  = null;   // setInterval for API fetch
+var noiseTimer   = null;   // setTimeout for market micro-fluctuation
+var liveScoreData = null;
+
+// ═══════════════════════════════════════════════════════
+//  APP START
+// ═══════════════════════════════════════════════════════
+function startApp() {
+  listenMatches();
+  listenBets();
+  listenSettlements();
+}
+
+// ═══════════════════════════════════════════════════════
+//  FIRESTORE LISTENERS
+// ═══════════════════════════════════════════════════════
+function listenMatches() {
+  db.collection('matches').onSnapshot(function(snap) {
+    allMatches = snap.docs.map(function(d){ return Object.assign({_id:d.id},d.data()); });
+    allMatches.sort(function(a,b){
+      var o={live:0,open:0,upcoming:1,closed:2,completed:2};
+      var oa=o[a.status]!==undefined?o[a.status]:1, ob=o[b.status]!==undefined?o[b.status]:1;
+      if(oa!==ob) return oa-ob;
+      var ta=a.createdAt?(a.createdAt.toMillis?a.createdAt.toMillis():0):0;
+      var tb=b.createdAt?(b.createdAt.toMillis?b.createdAt.toMillis():0):0;
+      return tb-ta;
+    });
+    renderMatchPills();
+    if (!selectedMatch && allMatches.length>0) {
+      var live=allMatches.find(function(m){return m.status==='live'||m.status==='open';});
+      selectMatch(live||allMatches[0]);
+    } else if (selectedMatch) {
+      var updated=allMatches.find(function(m){return m._id===selectedMatch._id;});
+      if (updated) {
+        selectedMatch=updated;
+        renderScoreboard();
+        if (liveOdds.source==='admin') resetAdminOdds();
+        updatePnl();
+        if((updated.status==='completed'||updated.status==='closed')&&updated.winner) notifySettlement(updated);
+      }
+    }
+  },function(err){
+    document.getElementById('matchScroll').innerHTML='<div style="padding:14px;color:var(--red);font-size:12px;">⚠️ '+err.message+'</div>';
+  });
+}
+
+function listenBets() {
+  db.collection('bets').where('userId','==',currentUser.id).where('status','==','pending')
+    .onSnapshot(function(snap){
+      var nb=snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+      nb.forEach(function(b){if(!cashoutTimers[b._id])startCashoutTimer(b);});
+      Object.keys(cashoutTimers).forEach(function(id){
+        if(!nb.find(function(b){return b._id===id;})){
+          clearInterval(cashoutTimers[id]);delete cashoutTimers[id];delete cashoutValues[id];
+        }
+      });
+      liveBets=nb;
+      if(document.getElementById('panel-live').style.display!=='none') renderLiveBets();
+    });
+}
+
+function listenSettlements() {
+  db.collection('bets').where('userId','==',currentUser.id).onSnapshot(function(snap){
+    snap.docChanges().forEach(function(ch){
+      if(ch.type!=='modified') return;
+      var b=Object.assign({_id:ch.doc.id},ch.doc.data());
+      if(notifiedBets[b._id]) return;
+      if(b.status==='won') {notifiedBets[b._id]=true;showToast('🏆 '+b.selectedTeam+' WON! +'+b.potentialProfit+' coins!','win');}
+      if(b.status==='lost'){notifiedBets[b._id]=true;showToast('😢 Lost on '+b.selectedTeam+'. -'+b.amount+' coins.','lose');}
+    });
+    if(document.getElementById('panel-hist').style.display!=='none') loadHistory();
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  ████  LIVE ODDS ENGINE  ████
+//
+//  Layer 1 — Admin base odds (Firestore)
+//  Layer 2 — API-driven recalculation every 30 s
+//  Layer 3 — Market micro-noise every 7–12 s
+//
+//  ODDS LOGIC (second innings / chase):
+//    RRR/CRR ratio is the primary driver.
+//    ratio > 1 = chasing team under pressure → their odds rise.
+//    ratio < 1 = chasing team dominant       → their odds fall.
+//    Wickets in hand heavily amplify the effect.
+//    Death overs (last 5) tighten everything.
+//
+//  ODDS LOGIC (first innings):
+//    CRR vs par run rate for the format.
+//    Wickets lost penalise batting team.
+//    Run rate above par reduces batting team's odds.
+// ═══════════════════════════════════════════════════════
+
+function roundOdds(v){ return Math.round(v*100)/100; }
+
+function clampOdds(v){ return Math.max(1.05,Math.min(15.0,v)); }
+
+function resetAdminOdds() {
+  if (!selectedMatch) return;
+  var m=selectedMatch;
+  var o1=parseFloat(m.odds_team1||(m.odds&&m.odds.team1Odds)||m.team1Odds||1.90);
+  var o2=parseFloat(m.odds_team2||(m.odds&&m.odds.team2Odds)||m.team2Odds||1.90);
+  liveOdds.team1=liveOdds.prevTeam1=liveOdds.anchor1=roundOdds(o1);
+  liveOdds.team2=liveOdds.prevTeam2=liveOdds.anchor2=roundOdds(o2);
+  liveOdds.source='admin';
+}
+
+// ── Core calculation ───────────────────────────────────
+function calcOddsFromData(d) {
+  // d: {innings, t1score, t1wkts, t1overs, t2score, t2wkts, t2overs,
+  //     crr, rrr, target, totalOvers}
+  var a1=liveOdds.anchor1||1.90, a2=liveOdds.anchor2||1.90;
+  var o1=a1, o2=a2;
+  var crr=d.crr||0, rrr=d.rrr||0, totalOvers=d.totalOvers||20;
+
+  if (d.innings===1) {
+    // First innings — batting vs bowling
+    var parRR = totalOvers<=20 ? 8.0 : (totalOvers<=50 ? 5.5 : 3.5);
+    // Run rate factor: how much above/below par (capped ±60%)
+    var rrF = crr>0 ? Math.max(-0.6, Math.min(0.6,(crr-parRR)/parRR)) : 0;
+    // Wicket penalty for batting team (each wicket beyond 2 hurts more)
+    var wk=d.t1wkts||0;
+    var wkPen = wk<=2 ? 0 : (0.07*(wk-2) + (wk>=7?0.12*(wk-6):0));
+    // Death overs amplifier
+    var oversLeft=totalOvers-d.t1overs;
+    var deathF = oversLeft<=5 ? (crr>parRR+2?-0.06:(crr<parRR-2?0.10:0)) : 0;
+    // Combined shift: negative = batting team doing well
+    var shift = rrF - wkPen + deathF;
+    var mult  = Math.exp(-shift*0.55);
+    o1 = clampOdds(roundOdds(a1*mult));
+    o2 = clampOdds(roundOdds(a2/(mult*0.97)));
+
+  } else {
+    // Second innings — chase math is the key
+    var ratio=1.0;
+    if (crr>0 && rrr>0)       ratio = rrr/crr;
+    else if (rrr>0 && crr===0) ratio = 2.5;   // no runs yet = pressure
+    else if (rrr===0 && crr>0) ratio = 0.5;   // already won / very close
+
+    // Wickets in hand factor
+    var wkInHand = 10-(d.t2wkts||0);
+    var wkF = wkInHand>=8 ? 0.82 : (wkInHand>=5?1.0:(wkInHand>=3?1.35:1.85));
+
+    // Overs remaining
+    var oLeft=totalOvers-(d.t2overs||0);
+    var oF=1.0;
+    if (oLeft<=3 && ratio<=1.0) oF=0.75; // nearly home
+    if (oLeft<=3 && ratio>1.5)  oF=1.45; // nearly impossible
+
+    // Impossible chase safety check
+    var runsNeeded=d.target>0?Math.max(0,d.target-d.t2score):0;
+    var ballsLeft =oLeft*6;
+    if (ballsLeft>0 && runsNeeded>0) {
+      var reqR=runsNeeded/(ballsLeft/6);
+      if(reqR>20) ratio=3.2;
+      else if(reqR>16) ratio=Math.max(ratio,2.2);
+    }
+
+    var chaseMult=Math.pow(Math.max(0.2,Math.min(3.5,ratio)),0.5)*wkF*oF;
+    chaseMult=Math.max(0.35,Math.min(3.2,chaseMult));
+
+    // team2 = chasing. High chaseMult means struggling.
+    o2=clampOdds(roundOdds(a2*chaseMult));
+    o1=clampOdds(roundOdds(a1/(chaseMult*0.97)));
+  }
+  return {team1:o1, team2:o2};
+}
+
+// ── Market micro-noise ─────────────────────────────────
+function applyNoise() {
+  if (!selectedMatch||(selectedMatch.status!=='live'&&selectedMatch.status!=='open')) return;
+
+  // Randomised tick size. Occasional "event" (wicket/boundary) = bigger move.
+  var isBigMove = Math.random()<0.12;
+  var ticks1, ticks2;
+  if (isBigMove) {
+    ticks1 = (Math.random()>0.5?1:-1)*(8+Math.floor(Math.random()*15));
+    ticks2 = -Math.round(ticks1*(0.6+Math.random()*0.3))+(Math.random()>0.5?1:-1);
+    // Flash tile to signal the move
+    var tile=document.getElementById(ticks1<0?'oddsT1':'oddsT2');
+    if(tile){tile.classList.add(ticks1<0?'odds-up':'odds-down');setTimeout(function(){tile.classList.remove('odds-up','odds-down');},500);}
+  } else {
+    ticks1 = (Math.random()>0.5?1:-1)*Math.floor(Math.random()*5+1);
+    ticks2 = -Math.round(ticks1*0.55)+(Math.random()>0.5?1:-1);
+  }
+
+  var n1=roundOdds(liveOdds.team1+ticks1*0.01);
+  var n2=roundOdds(liveOdds.team2+ticks2*0.01);
+  // Keep within ±8% of API anchor to prevent runaway drift
+  n1=Math.max(liveOdds.anchor1*0.92,Math.min(liveOdds.anchor1*1.08,n1));
+  n2=Math.max(liveOdds.anchor2*0.92,Math.min(liveOdds.anchor2*1.08,n2));
+  n1=Math.max(1.05,n1); n2=Math.max(1.05,n2);
+
+  liveOdds.prevTeam1=liveOdds.team1; liveOdds.prevTeam2=liveOdds.team2;
+  liveOdds.team1=n1; liveOdds.team2=n2;
+  renderOddsBanner();
+  saveOddsFirestore(n1,n2);
+}
+
+function scheduleNoise() {
+  noiseTimer=setTimeout(function(){applyNoise();scheduleNoise();},7000+Math.random()*5000);
+}
+
+function startPollers() {
+  stopPollers();
+  fetchAndUpdateOdds();
+  scorePoller=setInterval(fetchAndUpdateOdds,POLL_MS);
+  scheduleNoise();
+}
+function stopPollers() {
+  if(scorePoller){clearInterval(scorePoller);scorePoller=null;}
+  if(noiseTimer) {clearTimeout(noiseTimer);noiseTimer=null;}
+}
+function saveOddsFirestore(o1,o2) {
+  if(!selectedMatch) return;
+  db.collection('matches').doc(selectedMatch._id)
+    .update({odds_team1:o1,odds_team2:o2,oddsUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()})
+    .catch(function(){});
+}
+
+// ═══════════════════════════════════════════════════════
+//  API FETCH + PARSE
+// ═══════════════════════════════════════════════════════
+function fetchAndUpdateOdds() {
+  if(!selectedMatch||(selectedMatch.status!=='live'&&selectedMatch.status!=='open')) return;
+
+  var apiId  = selectedMatch.apiMatchId||selectedMatch.cricApiId||null;
+  var url    = apiId
+    ? API_BASE+'/cricket-scorecard?matchid='+encodeURIComponent(apiId)
+    : API_BASE+'/live-scores';
+
+  fetch(url,{method:'GET',headers:{
+    'Content-Type':'application/json',
+    'x-rapidapi-host':RAPIDAPI_HOST,
+    'x-rapidapi-key':RAPIDAPI_KEY
+  }}).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(json){
+    var parsed=parseApiResponse(json, selectedMatch.team1||'', selectedMatch.team2||'', apiId);
+    if(!parsed){runSimulated();return;}
+    liveScoreData=parsed;
+    renderScoreStrip(parsed);
+    var newO=calcOddsFromData(parsed);
+    liveOdds.prevTeam1=liveOdds.team1; liveOdds.prevTeam2=liveOdds.team2;
+    liveOdds.team1=newO.team1; liveOdds.team2=newO.team2;
+    liveOdds.anchor1=newO.team1; liveOdds.anchor2=newO.team2;
+    liveOdds.source='api';
+    renderOddsBanner();
+    saveOddsFirestore(newO.team1,newO.team2);
+    document.getElementById('ls-updated').textContent='API updated: '+new Date().toLocaleTimeString();
+    document.getElementById('oddsSourceLabel').textContent='Live odds — driven by match data';
+  }).catch(function(){
+    runSimulated();
+  });
+}
+
+// ── Simulated fallback (realistic random walk) ─────────
+function runSimulated() {
+  if(!selectedMatch||(selectedMatch.status!=='live'&&selectedMatch.status!=='open')) return;
+  var m=selectedMatch;
+  var aO1=parseFloat(m.odds_team1||(m.odds&&m.odds.team1Odds)||1.90);
+  var aO2=parseFloat(m.odds_team2||(m.odds&&m.odds.team2Odds)||1.90);
+  var cO1=liveOdds.team1||aO1, cO2=liveOdds.team2||aO2;
+  var rev=0.07;
+  var n1=roundOdds(cO1+(Math.random()-0.5)*0.10+rev*(aO1-cO1));
+  var n2=roundOdds(cO2+(Math.random()-0.5)*0.10+rev*(aO2-cO2));
+  n1=clampOdds(n1); n2=clampOdds(n2);
+  liveOdds.prevTeam1=liveOdds.team1; liveOdds.prevTeam2=liveOdds.team2;
+  liveOdds.team1=n1; liveOdds.team2=n2;
+  liveOdds.anchor1=n1; liveOdds.anchor2=n2;
+  liveOdds.source='simulated';
+  renderOddsBanner();
+  saveOddsFirestore(n1,n2);
+  document.getElementById('ls-updated').textContent='Simulated — '+new Date().toLocaleTimeString();
+  document.getElementById('oddsSourceLabel').textContent='Live odds — market simulation';
+}
+
+// ── Parse /live-scores response ────────────────────────
+// Typical string: "IND196-7 (20 Ovs) AUS9-2 (2.3 Ovs) Australia need 188 runs"
+// Also handles:   "IND260-8 (50 Ovs) AUS180-6 (38.4 Ovs) Australia need 81 from 68 balls"
+function parseApiResponse(json, t1, t2, apiId) {
+  if (!json) return null;
+  // Format B: structured scorecard
+  if (json.innings||json.scorecard) return parseScorecardObj(json);
+  // Format A: array of strings
+  var arr=Array.isArray(json)?json:(json.data||json.results||json.matches||[]);
+  if (!arr.length) return null;
+  // Find entry matching our teams (first 3 chars, case-insensitive)
+  var t1s=t1.substring(0,3).toLowerCase(), t2s=t2.substring(0,3).toLowerCase();
+  var entry=null;
+  if (apiId) { entry=arr[0]; }
+  else {
+    arr.forEach(function(x){
+      var s=(typeof x==='string'?x:(x.score||x.scoreStr||'')).toLowerCase();
+      if(s.indexOf(t1s)!==-1||s.indexOf(t2s)!==-1) entry=x;
+    });
+  }
+  if(!entry) return null;
+  var str=typeof entry==='string'?entry:(entry.score||entry.scoreStr||'');
+  return parseLiveStr(str);
+}
+
+function parseLiveStr(str) {
+  if(!str) return null;
+  var r={innings:1,t1score:0,t1wkts:0,t1overs:0,t2score:0,t2wkts:0,t2overs:0,
+         crr:0,rrr:0,target:0,totalOvers:20,rawStr:str};
+  // Detect format (T20=20, ODI=50)
+  var oMs=str.match(/\((\d+)\s*Ovs?\)/gi)||[];
+  var maxO=0;
+  oMs.forEach(function(o){var n=parseFloat(o.replace(/[^0-9.]/g,''));if(n>maxO)maxO=n;});
+  if(maxO>40) r.totalOvers=50; else if(maxO>20) r.totalOvers=maxO;
+  // Extract score blocks: "IND196-7 (20 Ovs)"
+  var re=/[A-Z]{2,5}(\d+)[\-\/](\d+)\s*\(([0-9.]+)\s*Ovs?\)/gi, m, blocks=[];
+  while((m=re.exec(str))!==null) blocks.push({runs:parseInt(m[1]),wkts:parseInt(m[2]),overs:parseFloat(m[3])});
+  if(blocks[0]){r.t1score=blocks[0].runs;r.t1wkts=blocks[0].wkts;r.t1overs=blocks[0].overs;}
+  if(blocks[1]){r.t2score=blocks[1].runs;r.t2wkts=blocks[1].wkts;r.t2overs=blocks[1].overs;r.innings=2;}
+  // Chase: "need 188 runs" or "need 81 from 68 balls"
+  var nm=str.match(/need\s+(\d+)\s*(?:runs?)?(?:\s+from\s+(\d+)\s*balls?)?/i);
+  if(nm){
+    r.innings=2;
+    var runsNeed=parseInt(nm[1]);
+    r.target=r.t2score+runsNeed;
+    var bLeft=nm[2]?parseInt(nm[2]):(r.totalOvers-r.t2overs)*6;
+    if(bLeft>0) r.rrr=roundOdds(runsNeed/(bLeft/6));
+  }
+  // CRR
+  if(r.innings===2&&r.t2overs>0) r.crr=roundOdds(r.t2score/r.t2overs);
+  else if(r.t1overs>0)            r.crr=roundOdds(r.t1score/r.t1overs);
+  return r;
+}
+
+function parseScorecardObj(json) {
+  try {
+    var innings=json.innings||json.scorecard||[];
+    if(!innings.length) return null;
+    var r={innings:innings.length,t1score:0,t1wkts:0,t1overs:0,t2score:0,t2wkts:0,t2overs:0,crr:0,rrr:0,target:0,totalOvers:20};
+    var i1=innings[0];
+    r.t1score=parseInt(i1.score||i1.runs||0); r.t1wkts=parseInt(i1.wickets||0); r.t1overs=parseFloat(i1.overs||0);
+    if(innings.length>=2){
+      var i2=innings[1];
+      r.t2score=parseInt(i2.score||i2.runs||0);r.t2wkts=parseInt(i2.wickets||0);r.t2overs=parseFloat(i2.overs||0);
+      r.target=r.t1score+1;
+      var tovers=parseFloat((json.matchHeader&&json.matchHeader.totalOvers)||20);
+      r.totalOvers=tovers;
+      var bLeft=Math.max(0,(tovers-r.t2overs)*6);
+      var rNeed=r.target-r.t2score;
+      if(bLeft>0) r.rrr=roundOdds(rNeed/(bLeft/6));
+      if(r.t2overs>0) r.crr=roundOdds(r.t2score/r.t2overs);
+    } else {
+      if(r.t1overs>0) r.crr=roundOdds(r.t1score/r.t1overs);
+    }
+    return r;
+  }catch(e){return null;}
+}
+
+// ═══════════════════════════════════════════════════════
+//  SCORE STRIP RENDER
+// ═══════════════════════════════════════════════════════
+function renderScoreStrip(d) {
+  if(!d||!selectedMatch) return;
+  document.getElementById('liveScoreStrip').style.display='block';
+  var t1=selectedMatch.team1||'Team 1', t2=selectedMatch.team2||'Team 2';
+  document.getElementById('ls-t1name').textContent  = t1;
+  document.getElementById('ls-t2name').textContent  = t2;
+  document.getElementById('ls-t1score').textContent = d.t1score+'-'+d.t1wkts;
+  document.getElementById('ls-t1over').textContent  = '('+d.t1overs+' ov)';
+  document.getElementById('ls-t2score').textContent = d.innings>1?d.t2score+'-'+d.t2wkts:'—';
+  document.getElementById('ls-t2over').textContent  = d.innings>1?'('+d.t2overs+' ov)':'';
+  var meta='';
+  if(d.innings===2&&d.target>0){
+    meta=t2+' need '+(d.target-d.t2score)+' from '+roundOdds(d.totalOvers-d.t2overs)+' overs';
+  } else if(d.innings===1){
+    meta=t1+' batting — 1st innings';
+  }
+  document.getElementById('ls-meta').textContent    = meta;
+  document.getElementById('ls-crr').textContent     = d.crr>0?d.crr.toFixed(2):'—';
+  document.getElementById('ls-rrr').textContent     = d.rrr>0?d.rrr.toFixed(2):'—';
+  document.getElementById('ls-wkts').textContent    = d.innings===2?d.t2wkts:d.t1wkts;
+  document.getElementById('ls-overs').textContent   = d.innings===2?d.t2overs:d.t1overs;
+}
+
+// ═══════════════════════════════════════════════════════
+//  MATCH PILLS
+// ═══════════════════════════════════════════════════════
+function renderMatchPills() {
+  var scroll=document.getElementById('matchScroll');
+  if(!allMatches.length){scroll.innerHTML='<div style="padding:14px;color:var(--muted);font-size:12px;">No matches available yet</div>';return;}
+  scroll.innerHTML='';
+  allMatches.forEach(function(m){
+    var el=document.createElement('div');
+    el.className='match-pill'+(selectedMatch&&selectedMatch._id===m._id?' active':'');
+    var sc='upcoming',sl='⏰ UPCOMING';
+    if(m.status==='live'||m.status==='open'){sc='live';sl='🔴 LIVE';}
+    else if(m.status==='closed'||m.status==='completed'){sc='completed';sl='✅ DONE';}
+    el.innerHTML='<div class="mp-teams">'+(m.team1||'TBA')+' vs '+(m.team2||'TBA')+'</div>'
+      +'<div class="mp-info">'+(m.datetime?new Date(m.datetime).toLocaleString():'')+'</div>'
+      +'<div class="mp-status '+sc+'">'+sl+'</div>';
+    el.onclick=(function(match){return function(){selectMatch(match);};})(m);
+    scroll.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  SELECT MATCH
+// ═══════════════════════════════════════════════════════
+function selectMatch(m) {
+  selectedMatch=m; selectedTeam=null; liveScoreData=null;
+  stopPollers(); resetAdminOdds();
+  renderMatchPills(); renderScoreboard(); renderOddsBanner(); renderTradePanel();
+  document.getElementById('liveScoreStrip').style.display='none';
+  var isLive=m.status==='live'||m.status==='open';
+  document.getElementById('oddsSourceRow').style.display=isLive?'flex':'none';
+  if(isLive) startPollers();
+}
+
+// ═══════════════════════════════════════════════════════
+//  SCOREBOARD
+// ═══════════════════════════════════════════════════════
+function renderScoreboard() {
+  if(!selectedMatch) return;
+  var m=selectedMatch, wrap=document.getElementById('scoreboardWrap');
+  var content=m.scoreLink
+    ?'<div class="score-iframe-wrap"><iframe class="score-iframe" src="'+m.scoreLink+'" sandbox="allow-scripts allow-same-origin allow-popups" loading="lazy"></iframe></div>'
+      +'<div style="padding:5px 10px;font-size:10px;color:var(--muted);text-align:right"><a href="'+m.scoreLink+'" target="_blank" style="color:var(--blue);text-decoration:none">Open full scorecard ↗</a></div>'
+    :'<div style="padding:28px;text-align:center;color:var(--muted);font-size:13px;">No scorecard link added yet</div>';
+  var isLive=m.status==='live'||m.status==='open';
+  var isDone=m.status==='completed'||m.status==='closed';
+  var badge=isLive?'<div class="sb-badge-live">LIVE</div>'
+    :isDone?'<div style="font-size:10px;color:var(--gold);font-weight:700">🏆 '+(m.winner||'Completed')+'</div>'
+    :'<div style="font-size:10px;color:var(--orange);font-weight:700">⏰ UPCOMING</div>';
+  wrap.innerHTML='<div class="sb-header"><div class="sb-match-name">'+(m.title||(m.team1+' vs '+m.team2))+'</div>'+badge+'</div>'+content;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ODDS BANNER
+// ═══════════════════════════════════════════════════════
+function getTeamOdds(which){ return which==='team1'?liveOdds.team1:liveOdds.team2; }
+
+function renderOddsBanner() {
+  var m=selectedMatch;
+  var isLive=m&&(m.status==='live'||m.status==='open');
+  if(!isLive){document.getElementById('oddsBanner').style.display='none';return;}
+  var o1=liveOdds.team1,o2=liveOdds.team2,p1=liveOdds.prevTeam1,p2=liveOdds.prevTeam2;
+  var stake=parseInt((document.getElementById('stakeInput')||{}).value||'100')||100;
+  document.getElementById('ot1Name').textContent=m.team1||'Team 1';
+  document.getElementById('ot2Name').textContent=m.team2||'Team 2';
+  document.getElementById('ot1Odds').textContent=o1.toFixed(2)+'x';
+  document.getElementById('ot2Odds').textContent=o2.toFixed(2)+'x';
+  document.getElementById('ot1Pot').textContent ='Win: 🪙'+Math.floor(stake*o1);
+  document.getElementById('ot2Pot').textContent ='Win: 🪙'+Math.floor(stake*o2);
+  function setChange(id,cur,prev){
+    var el=document.getElementById(id); if(!el) return;
+    var d=roundOdds(cur-prev);
+    if(d>0.005)       {el.textContent='▲ +'+d.toFixed(2);el.className='ot-change up';}
+    else if(d<-0.005) {el.textContent='▼ ' +d.toFixed(2);el.className='ot-change down';}
+    else              {el.textContent='—';              el.className='ot-change flat';}
+  }
+  setChange('ot1Change',o1,p1); setChange('ot2Change',o2,p2);
+  document.getElementById('oddsT1').classList.toggle('selected',selectedTeam==='team1');
+  document.getElementById('oddsT2').classList.toggle('selected',selectedTeam==='team2');
+  document.getElementById('oddsBanner').style.display='grid';
+}
+
+// ═══════════════════════════════════════════════════════
+//  TRADE PANEL
+// ═══════════════════════════════════════════════════════
+function renderTradePanel(){
+  var inner=document.getElementById('tradeInner');
+  var isLive=selectedMatch&&(selectedMatch.status==='live'||selectedMatch.status==='open');
+  var isDone=selectedMatch&&(selectedMatch.status==='completed'||selectedMatch.status==='closed');
+  if(!selectedMatch){inner.innerHTML='<div class="empty-state">Select a match above</div>';return;}
+  if(!isLive){inner.innerHTML='<div class="empty-state">'+(isDone?'✅ Match completed'+(selectedMatch.winner?' — 🏆 '+selectedMatch.winner:''):'⏰ Match not started yet. Odds appear once live.')+'</div>';return;}
+  inner.innerHTML='<div class="bet-card">'
+    +'<div class="bc-title">⚡ Place Your Bet <span style="color:var(--muted);font-weight:400;font-size:10px;text-transform:none">(Min 100 🪙)</span></div>'
+    +'<div class="stake-label">Stake Amount</div>'
+    +'<div class="stake-row"><input type="number" class="stake-input" id="stakeInput" value="100" min="100" oninput="updatePnl()"><span style="font-size:12px;color:var(--muted)">🪙</span></div>'
+    +'<div class="qb-row"><div class="qb" onclick="addStake(100)">+100</div><div class="qb" onclick="addStake(500)">+500</div><div class="qb" onclick="addStake(1000)">+1K</div><div class="qb" onclick="addStake(5000)">+5K</div><div class="qb" onclick="setMaxStake()">MAX</div></div>'
+    +'<div class="pnl-block" id="pnlBlock">'
+    +'<div class="pnl-row"><span class="pnl-lbl">Selected Team</span><span class="pnl-val" id="selTeamLbl" style="color:var(--blue)">— Tap odds above —</span></div>'
+    +'<div class="pnl-row"><span class="pnl-lbl">Odds (live)</span><span class="pnl-val" id="selOddsLbl">—</span></div>'
+    +'<div class="pnl-row"><span class="pnl-lbl">Potential Win</span><span class="pnl-val" id="potWinLbl" style="color:var(--green)">—</span></div>'
+    +'<div class="pnl-row"><span class="pnl-lbl">If Loss</span><span class="pnl-val" id="potLossLbl" style="color:var(--red)">—</span></div>'
+    +'</div>'
+    +'<button class="place-btn" id="placeBetBtn" onclick="placeBet()" disabled>Tap a team above to select</button>'
+    +'</div>';
+}
+
+function selTeam(which){
+  if(!selectedMatch||(selectedMatch.status!=='live'&&selectedMatch.status!=='open')) return;
+  selectedTeam=which; renderOddsBanner(); updatePnl();
+  var btn=document.getElementById('placeBetBtn');
+  if(btn){btn.disabled=false;btn.textContent='BACK '+(which==='team1'?selectedMatch.team1:selectedMatch.team2).toUpperCase();}
+}
+function updatePnl(){
+  if(!selectedTeam||!selectedMatch){renderOddsBanner();return;}
+  var stake=parseInt((document.getElementById('stakeInput')||{}).value||'0')||0;
+  var odds=getTeamOdds(selectedTeam),potWin=Math.floor(stake*odds),potP=potWin-stake;
+  var name=selectedTeam==='team1'?selectedMatch.team1:selectedMatch.team2;
+  var s=document.getElementById('selTeamLbl'),o=document.getElementById('selOddsLbl'),
+      w=document.getElementById('potWinLbl'), l=document.getElementById('potLossLbl');
+  if(s)s.textContent=name; if(o)o.textContent=odds.toFixed(2)+'x';
+  if(w)w.textContent='+'+potP+' 🪙 (Total: '+potWin+')';
+  if(l)l.textContent='-'+stake+' 🪙';
+  renderOddsBanner();
+}
+function addStake(a){var i=document.getElementById('stakeInput');if(i){i.value=(parseInt(i.value)||0)+a;updatePnl();}}
+function setMaxStake(){var i=document.getElementById('stakeInput');if(i){i.value=balance;updatePnl();}}
+
+// ═══════════════════════════════════════════════════════
+//  PLACE BET (atomic Firestore transaction)
+// ═══════════════════════════════════════════════════════
+function placeBet(){
+  if(!selectedMatch||!selectedTeam){showToast('Select a team first','info');return;}
+  var stake=parseInt(document.getElementById('stakeInput').value)||0;
+  if(stake<100){showToast('Minimum 100 coins!','info');return;}
+  if(stake>balance){showToast('Not enough coins!','lose');return;}
+  var teamName=selectedTeam==='team1'?selectedMatch.team1:selectedMatch.team2;
+  var odds=getTeamOdds(selectedTeam);  // lock in live odds NOW
+  var potWin=Math.floor(stake*odds), potP=potWin-stake;
+  var btn=document.getElementById('placeBetBtn');
+  btn.disabled=true; btn.textContent='Placing bet...';
+  db.runTransaction(function(tx){
+    var uRef=db.collection('users').doc(currentUser.id);
+    return tx.get(uRef).then(function(uDoc){
+      if(!uDoc.exists) throw new Error('User not found');
+      var d=uDoc.data(),bal=d.walletBalance!==undefined?(d.walletBalance||0):(d.wallet||0);
+      if(stake>bal) throw new Error('Insufficient balance');
+      var upd={};
+      if(d.walletBalance!==undefined) upd.walletBalance=firebase.firestore.FieldValue.increment(-stake);
+      else upd.wallet=firebase.firestore.FieldValue.increment(-stake);
+      tx.update(uRef,upd);
+      var bRef=db.collection('bets').doc();
+      tx.set(bRef,{
+        userId:currentUser.id,username:currentUser.username||'',
+        matchId:selectedMatch._id,matchTitle:selectedMatch.title||(selectedMatch.team1+' vs '+selectedMatch.team2),
+        selectedTeam:teamName,selectedTeamKey:selectedTeam,
+        amount:stake,odds:odds,entryOdds:odds,
+        potentialWin:potWin,potentialProfit:potP,
+        cashoutMin:selectedMatch.cashoutMin||30,cashoutMax:selectedMatch.cashoutMax||70,
+        status:'pending',_notified:false,
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+  }).then(function(){
+    showToast('✅ Bet placed! '+teamName+' @'+odds.toFixed(2)+'x | 🪙'+stake,'win');
+    selectedTeam=null; renderOddsBanner(); renderTradePanel(); switchTab('live');
+  }).catch(function(e){
+    showToast('Error: '+e.message,'lose');
+    btn.disabled=false; btn.textContent='BACK '+teamName.toUpperCase();
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  CASHOUT
+// ═══════════════════════════════════════════════════════
+function startCashoutTimer(bet){
+  cashoutValues[bet._id]=calcCashout(bet);
+  cashoutTimers[bet._id]=setInterval(function(){
+    cashoutValues[bet._id]=calcCashout(bet);
+    if(document.getElementById('panel-live').style.display!=='none') updateCashoutDisplay(bet._id);
+  },3000);
+}
+function calcCashout(bet){
+  var m=allMatches.find(function(x){return x._id===bet.matchId;});
+  var minP=(m&&m.cashoutMin!=null)?m.cashoutMin:30, maxP=(m&&m.cashoutMax!=null)?m.cashoutMax:70;
+  var pct=minP+Math.random()*(maxP-minP); pct=Math.max(minP,Math.min(maxP,pct));
+  var potWin=bet.potentialWin||(bet.amount+(bet.potentialProfit||0));
+  return{coins:Math.min(Math.max(Math.floor(potWin*pct/100),0),potWin),pct:Math.round(pct),potWin:potWin};
+}
+function updateCashoutDisplay(id){
+  var co=cashoutValues[id]; if(!co) return;
+  var c=document.getElementById('coCoins_'+id),p=document.getElementById('coPct_'+id),b=document.getElementById('coBtn_'+id);
+  if(c)c.textContent='🪙 '+co.coins; if(p)p.textContent=co.pct+'% of potential win';
+  if(b)b.textContent='💰 CASH OUT — Get 🪙'+co.coins;
+}
+function doCashout(betId,stake,potWin){
+  var co=cashoutValues[betId]||{coins:0},coC=Math.min(Math.max(co.coins,0),potWin);
+  var btn=document.getElementById('coBtn_'+betId);
+  if(btn){btn.disabled=true;btn.textContent='Processing...';}
+  if(cashoutTimers[betId]){clearInterval(cashoutTimers[betId]);delete cashoutTimers[betId];}
+  db.runTransaction(function(tx){
+    var bRef=db.collection('bets').doc(betId),uRef=db.collection('users').doc(currentUser.id);
+    return Promise.all([tx.get(bRef),tx.get(uRef)]).then(function(res){
+      if(!res[0].exists||res[0].data().status!=='pending') throw new Error('Bet already settled');
+      tx.update(bRef,{status:'cashout',settledAmount:coC,cashoutPct:co.pct||0,settledAt:firebase.firestore.FieldValue.serverTimestamp()});
+      var d=res[1].data(),upd={};
+      if(d.walletBalance!==undefined) upd.walletBalance=firebase.firestore.FieldValue.increment(coC);
+      else upd.wallet=firebase.firestore.FieldValue.increment(coC);
+      tx.update(uRef,upd);
+    });
+  }).then(function(){showToast('💰 Cashed out! Got 🪙'+coC,coC>=stake?'win':'info');})
+  .catch(function(e){showToast('Error: '+e.message,'lose');if(btn){btn.disabled=false;btn.textContent='💰 CASH OUT — Get 🪙'+coC;}});
+}
+
+// ═══════════════════════════════════════════════════════
+//  LIVE BETS RENDER
+// ═══════════════════════════════════════════════════════
+function renderLiveBets(){
+  var list=document.getElementById('liveBetsList');
+  if(!liveBets.length){list.innerHTML='<div class="empty-state">No active bets.<br>Go to Place Bet tab to trade.</div>';return;}
+  list.innerHTML='';
+  liveBets.forEach(function(bet){
+    var co=cashoutValues[bet._id]||calcCashout(bet);cashoutValues[bet._id]=co;
+    var potWin=bet.potentialWin||(bet.amount+(bet.potentialProfit||0)),oddsV=bet.odds||bet.entryOdds||0;
+    var el=document.createElement('div');el.className='live-bet-card';
+    el.innerHTML='<div class="lbc-header"><div><div class="lbc-match">'+bet.matchTitle+'</div><div class="lbc-team">🏏 '+bet.selectedTeam+'</div></div><div class="lbc-status">ACTIVE</div></div>'
+      +'<div class="lbc-grid"><div class="lbc-item"><div class="lbc-val">'+oddsV.toFixed(2)+'x</div><div class="lbc-lbl">Entry Odds</div></div>'
+      +'<div class="lbc-item"><div class="lbc-val">🪙'+bet.amount+'</div><div class="lbc-lbl">Stake</div></div>'
+      +'<div class="lbc-item"><div class="lbc-val" style="color:var(--green)">🪙'+potWin+'</div><div class="lbc-lbl">Pot. Win</div></div></div>'
+      +'<div class="cashout-box"><div class="co-row"><div><div class="co-label">Live Cashout Value</div><div class="co-val" id="coCoins_'+bet._id+'">🪙 '+co.coins+'</div><div class="co-pct" id="coPct_'+bet._id+'">'+co.pct+'% of potential win</div></div>'
+      +'<div style="text-align:right;font-size:10px;color:var(--muted);">Max: 🪙'+potWin+'<br>Never exceeds</div></div>'
+      +'<button class="cashout-btn" id="coBtn_'+bet._id+'" onclick="doCashout(\''+bet._id+'\','+bet.amount+','+potWin+')">💰 CASH OUT — Get 🪙'+co.coins+'</button>'
+      +'<div class="co-warning">Cashout fluctuates. Won\'t exceed 🪙'+potWin+'</div></div>';
+    list.appendChild(el);
+  });
+}
+  HISTORY
+// ═══════════════════════════════════════════════════════
+function loadHistory(){
+  db.collection('bets').where('userId','==',currentUser.id).orderBy('createdAt','desc').get()
+  .then(function(s){renderHistory(s.docs.map(function(d){return Object.assign({_id:d.id},d.data());}));})
+  .catch(function(){
+    db.collection('bets').where('userId','==',currentUser.id).get().then(function(s){
+      var b=s.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+      b.sort(function(a,c){var ta=a.createdAt?(a.createdAt.toMillis?a.createdAt.toMillis():0):0,tb=c.createdAt?(c.createdAt.toMillis?c.createdAt.toMillis():0):0;return tb-ta;});
+      renderHistory(b);
+    });
+  });
+}
+function renderHistory(bets){
+  var list=document.getElementById('histList');
+  if(!bets.length){list.innerHTML='<div class="empty-state">No bet history yet</div>';return;}
+  list.innerHTML='';
+  bets.forEach(function(b){
+    var ts=b.createdAt?b.createdAt.toDate().toLocaleString():'—';
+    var potWin=b.potentialWin||(b.amount+(b.potentialProfit||0)),oddsV=b.odds||b.entryOdds||0;
+    var sc,st,sr;
+    switch(b.status){
+      case 'won':    sc='sb-won';     st='✅ WON';     sr='<div class="lbc-item"><div class="hi-cell-val" style="color:var(--green)">+'+(b.potentialProfit||0)+' 🪙</div><div class="hi-cell-lbl">Profit</div></div>';break;
+      case 'lost':   sc='sb-lost';    st='❌ LOST';    sr='<div class="lbc-item"><div class="hi-cell-val" style="color:var(--red)">-'+b.amount+' 🪙</div><div class="hi-cell-lbl">Loss</div></div>';break;
+      case 'cashout':sc='sb-cashout'; st='💰 CASHOUT'; sr='<div class="lbc-item"><div class="hi-cell-val" style="color:var(--gold)">🪙'+(b.settledAmount||0)+'</div><div class="hi-cell-lbl">Got Back</div></div>';break;
+      default:       sc='sb-active';  st='⏳ ACTIVE';  sr='<div class="lbc-item"><div class="hi-cell-val" style="color:var(--blue)">🪙'+potWin+'</div><div class="hi-cell-lbl">Pot. Win</div></div>';
+    }
+    var el=document.createElement('div');el.className='hist-item';
+    el.innerHTML='<div class="hi-match">'+(b.matchTitle||'')+'</div><div class="hi-team">🏏 '+(b.selectedTeam||'')+'</div><div class="hi-odds">@ '+oddsV.toFixed(2)+'x</div>'
+      +'<div class="hi-grid"><div class="lbc-item"><div class="hi-cell-val">🪙'+b.amount+'</div><div class="hi-cell-lbl">Stake</div></div><div class="lbc-item"><div class="hi-cell-val">🪙'+potWin+'</div><div class="hi-cell-lbl">Pot. Win</div></div>'+sr+'</div>'
+      +'<div class="hi-bottom"><div class="hi-time">'+ts+'</div><div class="status-badge '+sc+'">'+st+'</div></div>';
+    list.appendChild(el);
+  });
+}
+
+function notifySettlement(match){
+  liveBets.forEach(function(bet){
+    if(bet.matchId!==match._id) return;
+    var won=bet.selectedTeamKey===(match.winner===match.team1?'team1':'team2');
+    showToast(won?'🏆 '+match.winner+' WON! Profit added!':'😢 '+match.winner+' won. Bet lost.',won?'win':'lose');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  TABS + TOAST
+// ═══════════════════════════════════════════════════════
+function switchTab(t){
+  ['trade','live','hist'].forEach(function(x){
+    document.getElementById('tab-'+x).classList.toggle('active',x===t);
+    document.getElementById('panel-'+x).style.display=x===t?'block':'none';
+  });
+  if(t==='live') renderLiveBets();
+  if(t==='hist') loadHistory();
+  if(t==='trade'){renderTradePanel();renderOddsBanner();}
+}
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type+' show';
+  setTimeout(function(){t.className='toast';},3500);
+}
+</script>
+</body>
+</html>
