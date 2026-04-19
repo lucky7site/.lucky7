@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cricket Trading – Lucky 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050508;--green:#00ff88;--purple:#b44fff;--blue:#00c8ff;
+  --red:#ff4466;--gold:#ffd700;--orange:#ff8c00;--text:#e8eaf0;
+  --muted:#7a7d8e;--border:rgba(255,255,255,0.08);--card:rgba(255,255,255,0.04);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(0,255,136,0.07),transparent 60%);pointer-events:none;z-index:0;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:rgba(5,5,8,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+.back-btn{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--text);}
+.page-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:800;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.balance-chip{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:18px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--green);}
+
+main{position:relative;z-index:1;padding-bottom:40px;}
+
+/* MATCH PILLS */
+.section{padding:12px 12px 0;}
+.sec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;}
+.match-scroll{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;}
+.match-scroll::-webkit-scrollbar{display:none;}
+.match-pill{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:10px 13px;cursor:pointer;transition:.2s;min-width:160px;}
+.match-pill.active{border-color:var(--green);background:rgba(0,255,136,0.06);}
+.match-pill:active{transform:scale(0.95);}
+.mp-teams{font-size:11px;font-weight:700;}
+.mp-info{font-size:10px;color:var(--muted);margin-top:2px;}
+.mp-status{display:inline-flex;align-items:center;gap:4px;font-size:9px;margin-top:5px;font-weight:700;}
+.mp-status.live{color:var(--green);}
+.mp-status.live::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.mp-status.open{color:var(--green);}
+.mp-status.open::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.mp-status.upcoming{color:var(--orange);}
+.mp-status.closed{color:var(--red);}
+.mp-status.completed{color:var(--gold);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* SCOREBOARD */
+.scoreboard-wrap{margin:12px;border-radius:18px;overflow:hidden;border:1px solid var(--border);background:rgba(255,255,255,0.03);}
+.sb-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);}
+.sb-match-name{font-size:12px;font-weight:700;}
+.sb-badge-live{background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.28);border-radius:18px;padding:3px 9px;font-size:9px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:3px;}
+.sb-badge-live::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.score-iframe-wrap{width:100%;height:220px;background:#0a0a12;}
+.score-iframe{width:100%;height:100%;border:none;display:block;}
+
+/* ODDS BANNER */
+.odds-banner{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px;margin-top:0;}
+.odds-tile{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:13px 14px;text-align:center;cursor:pointer;transition:.2s;position:relative;overflow:hidden;}
+.odds-tile:active{transform:scale(0.96);}
+.odds-tile.selected{border-color:var(--blue);background:rgba(0,150,255,0.1);}
+.odds-tile.selected::before{content:'✓';position:absolute;top:7px;right:9px;font-size:10px;color:var(--blue);font-weight:900;}
+.ot-team{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ot-odds{font-family:'Poppins',sans-serif;font-size:22px;font-weight:900;color:var(--blue);}
+.ot-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.ot-pot{font-size:11px;color:var(--green);margin-top:5px;font-weight:700;}
+@keyframes oddsPulse{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
+.pulse{animation:oddsPulse .4s ease;}
+
+/* TABS */
+.tabs{display:flex;gap:0;margin:12px;background:rgba(255,255,255,0.04);border-radius:13px;padding:3px;}
+.tab{flex:1;padding:9px 0;text-align:center;font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;cursor:pointer;border-radius:10px;transition:.2s;color:var(--muted);}
+.tab.active{background:linear-gradient(135deg,rgba(0,255,136,0.18),rgba(0,200,255,0.1));color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+
+/* BET PANEL */
+.bet-panel{padding:0 12px;}
+.bet-card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:15px;margin-bottom:11px;}
+.bc-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.stake-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;}
+.stake-row{display:flex;gap:7px;align-items:center;}
+.stake-input{background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-size:14px;font-weight:700;width:110px;outline:none;text-align:center;font-family:'Poppins',sans-serif;}
+.stake-input:focus{border-color:var(--green);}
+.qb-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+.qb{border:1px solid var(--border);border-radius:7px;padding:4px 10px;background:rgba(255,255,255,0.04);font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);}
+.qb:active{background:rgba(255,255,255,.1);}
+.pnl-block{margin-top:10px;background:rgba(255,255,255,0.03);border-radius:10px;padding:11px 13px;}
+.pnl-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.pnl-row:last-child{margin-bottom:0;}
+.pnl-lbl{color:var(--muted);}
+.pnl-val{font-weight:700;}
+.place-btn{width:100%;border:none;border-radius:12px;padding:14px;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s;background:linear-gradient(90deg,#0055aa,var(--blue));color:#000;font-family:'Poppins',sans-serif;}
+.place-btn:active{transform:scale(.97);}
+.place-btn:disabled{opacity:.4;pointer-events:none;}
+
+/* LIVE BET CARD */
+.live-bet-card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:15px;margin-bottom:11px;}
+.lbc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.lbc-match{font-size:10px;color:var(--muted);}
+.lbc-team{font-size:14px;font-weight:700;margin:3px 0;}
+.lbc-status{font-size:9px;font-weight:700;color:var(--green);background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:2px 7px;}
+.lbc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0;}
+.lbc-item{background:rgba(255,255,255,0.03);border-radius:9px;padding:8px;text-align:center;}
+.lbc-val{font-size:13px;font-weight:700;}
+.lbc-lbl{font-size:9px;color:var(--muted);margin-top:2px;}
+.cashout-box{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:12px;margin-top:8px;}
+.co-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.co-label{font-size:11px;color:var(--muted);}
+.co-val{font-size:16px;font-weight:800;color:var(--gold);}
+.co-pct{font-size:10px;color:var(--muted);}
+.cashout-btn{width:100%;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#006644,var(--green));color:#000;transition:.2s;font-family:'Poppins',sans-serif;margin-top:8px;}
+.cashout-btn:active{transform:scale(.97);}
+.cashout-btn:disabled{opacity:0.4;pointer-events:none;}
+.co-warning{font-size:10px;color:var(--muted);text-align:center;margin-top:5px;}
+
+/* HISTORY */
+.hist-sec{padding:0 12px 14px;}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;}
+.hi-match{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.hi-team{font-size:13px;font-weight:700;margin-bottom:2px;}
+.hi-odds{font-size:11px;color:var(--blue);}
+.hi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;}
+.hi-cell{background:rgba(255,255,255,0.03);border-radius:8px;padding:7px;text-align:center;}
+.hi-cell-val{font-size:12px;font-weight:700;}
+.hi-cell-lbl{font-size:9px;color:var(--muted);margin-top:2px;}
+.hi-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.hi-time{font-size:10px;color:var(--muted);}
+.status-badge{font-size:11px;font-weight:700;border-radius:8px;padding:3px 10px;}
+.sb-active{background:rgba(0,200,255,0.1);color:var(--blue);border:1px solid rgba(0,200,255,0.2);}
+.sb-won{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+.sb-lost{background:rgba(255,68,102,0.1);color:var(--red);border:1px solid rgba(255,68,102,0.2);}
+.sb-cashout{background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
+
+.empty-state{text-align:center;padding:36px 20px;color:var(--muted);font-size:13px;line-height:1.6;}
+.toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(10,10,20,.97);border:1px solid var(--border);border-radius:13px;padding:9px 18px;font-size:13px;font-weight:600;z-index:500;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;font-family:'Poppins',sans-serif;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{border-color:var(--green);color:var(--green);}
+.toast.lose{border-color:var(--red);color:var(--red);}
+.toast.info{border-color:var(--blue);color:var(--blue);}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="back-btn" onclick="location.href='index.html'">←</div>
+  <div class="page-title">🏏 Cricket Trading</div>
+  <div class="balance-chip" id="balChip">🪙 0</div>
+</header>
+
+<main>
+  <div class="section">
+    <div class="sec-label">Select Match</div>
+    <div class="match-scroll" id="matchScroll">
+      <div style="padding:14px;color:var(--muted);font-size:12px;">Loading matches...</div>
+    </div>
+  </div>
+
+  <div class="scoreboard-wrap" id="scoreboardWrap">
+    <div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:13px;">Select a match to view scoreboard</div>
+  </div>
+
+  <div class="odds-banner" id="oddsBanner" style="display:none;">
+    <div class="odds-tile" id="oddsT1" onclick="selTeam('team1')">
+      <div class="ot-team" id="ot1Name">Team 1</div>
+      <div class="ot-odds" id="ot1Odds">—</div>
+      <div class="ot-sub">Tap to back</div>
+      <div class="ot-pot" id="ot1Pot"></div>
+    </div>
+    <div class="odds-tile" id="oddsT2" onclick="selTeam('team2')">
+      <div class="ot-team" id="ot2Name">Team 2</div>
+      <div class="ot-odds" id="ot2Odds">—</div>
+      <div class="ot-sub">Tap to back</div>
+      <div class="ot-pot" id="ot2Pot"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-trade" onclick="switchTab('trade')">PLACE BET</div>
+    <div class="tab"        id="tab-live"  onclick="switchTab('live')">LIVE BETS</div>
+    <div class="tab"        id="tab-hist"  onclick="switchTab('hist')">HISTORY</div>
+  </div>
+
+  <div id="panel-trade" class="bet-panel">
+    <div id="tradeInner">
+      <div class="empty-state">Select a live match and tap a team's odds to place a bet</div>
+    </div>
+  </div>
+
+  <div id="panel-live" class="bet-panel" style="display:none;">
+    <div id="liveBetsList"><div class="empty-state">No active bets.<br>Go to Place Bet to trade.</div></div>
+  </div>
+
+  <div id="panel-hist" class="hist-sec" style="display:none;">
+    <div id="histList"><div class="empty-state">No bet history yet</div></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  FIREBASE INIT
+// ══════════════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey:            "AIzaSyClNX5DPD55Lhj_N-UwfWtD5VssOZQZ9qw",
+  authDomain:        "lucky7-64a59.firebaseapp.com",
+  projectId:         "lucky7-64a59",
+  storageBucket:     "lucky7-64a59.firebasestorage.app",
+  messagingSenderId: "950599334529",
+  appId:             "1:950599334529:web:ca04176afa45a923532b80"
+});
+var db   = firebase.firestore();
+var auth = firebase.auth();
+
+// ══════════════════════════════════════════════════════
+//  AUTH — works with BOTH Firebase Auth AND localStorage session
+//  Priority: Firebase Auth → localStorage fallback
+// ══════════════════════════════════════════════════════
+var currentUser = null;
+var balance     = 0;
+var unsubUser   = null; // Firestore wallet listener unsubscribe
+
+function initWithUser(uid, fallbackUsername) {
+  currentUser = { id: uid, username: fallbackUsername || 'Player' };
+
+  // ── Real-time wallet listener ──────────────────────
+  // This is the ONLY source of truth for balance.
+  // It fires immediately AND on every admin/server update.
+  if (unsubUser) unsubUser(); // detach old listener if any
+  unsubUser = db.collection('users').doc(uid).onSnapshot(function(snap) {
+    if (!snap.exists) return;
+    var data = snap.data();
+    balance = typeof data.walletBalance !== 'undefined'
+      ? (data.walletBalance || 0)
+      : (data.wallet || 0);                  // support both field names
+    // Keep localStorage in sync so other pages read the same value
+    localStorage.setItem('l7_balance', String(balance));
+    document.getElementById('balChip').textContent = '🪙 ' + balance;
+  });
+
+  startApp();
+}
+
+// Try Firebase Auth first
+auth.onAuthStateChanged(function(firebaseUser) {
+  if (firebaseUser) {
+    initWithUser(firebaseUser.uid, firebaseUser.displayName || firebaseUser.email);
+    return;
+  }
+  // Fallback: localStorage session (used by Lucky 7's custom auth)
+  var sessStr = localStorage.getItem('l7_current_user');
+  if (sessStr) {
+    var sess;
+    try { sess = JSON.parse(sessStr); } catch(e) { sess = null; }
+    if (sess && sess.id) {
+      initWithUser(sess.id, sess.username);
+      return;
+    }
+  }
+  // Not logged in — redirect
+  location.replace('login.html');
+});
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+var allMatches    = [];
+var selectedMatch = null;
+var selectedTeam  = null;
+var liveBets      = [];
+var cashoutTimers = {};
+var cashoutValues = {};
+var matchUnsub    = null;
+var betsUnsub     = null;
+var settlUnsub    = null;
+var notifiedBets  = {};   // track which bets we've already notified
+
+// ══════════════════════════════════════════════════════
+//  START APP — called once auth resolves
+// ══════════════════════════════════════════════════════
+function startApp() {
+  listenMatches();
+  listenBets();
+  listenSettlements();
+}
+
+// ══════════════════════════════════════════════════════
+//  MATCH LISTENER — real-time, catches every admin change
+//  Supports status values: 'open', 'live', 'upcoming', 'closed', 'completed'
+// ══════════════════════════════════════════════════════
+function listenMatches() {
+  if (matchUnsub) matchUnsub();
+
+  // FIX: removed .orderBy() — ordering by createdAt requires a composite index
+  // which may not exist and silently returns 0 results.
+  // We sort client-side instead.
+  matchUnsub = db.collection('matches').onSnapshot(function(snap) {
+    allMatches = snap.docs.map(function(d) {
+      return Object.assign({ _id: d.id }, d.data());
+    });
+
+    // Sort: live/open first, then upcoming, then completed
+    allMatches.sort(function(a, b) {
+      var order = { live: 0, open: 0, upcoming: 1, closed: 2, completed: 2 };
+      var oa = (order[a.status] !== undefined) ? order[a.status] : 1;
+      var ob = (order[b.status] !== undefined) ? order[b.status] : 1;
+      if (oa !== ob) return oa - ob;
+      // Within same group, newest first
+      var ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : 0) : 0;
+      var tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : 0) : 0;
+      return tb - ta;
+    });
+
+    renderMatchPills();
+
+    // Auto-select first live/open match on first load
+    if (!selectedMatch && allMatches.length > 0) {
+      var live = allMatches.find(function(m) {
+        return m.status === 'live' || m.status === 'open';
+      });
+      selectMatch(live || allMatches[0]);
+      return;
+    }
+
+    // If a match is already selected, refresh it with latest data
+    if (selectedMatch) {
+      var updated = allMatches.find(function(m) { return m._id === selectedMatch._id; });
+      if (updated) {
+        selectedMatch = updated;
+        renderScoreboard();
+        renderOddsBanner();
+        updatePnl();
+        // Settlement notification
+        if ((updated.status === 'completed' || updated.status === 'closed') && updated.winner) {
+          notifySettlement(updated);
+        }
+      }
+    }
+  }, function(err) {
+    console.error('Match listener error:', err.message);
+    document.getElementById('matchScroll').innerHTML =
+      '<div style="padding:14px;color:var(--red);font-size:12px;">⚠️ Could not load matches: ' + err.message + '</div>';
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  LIVE BETS LISTENER
+// ══════════════════════════════════════════════════════
+function listenBets() {
+  if (betsUnsub) betsUnsub();
+
+  betsUnsub = db.collection('bets')
+    .where('userId', '==', currentUser.id)
+    .where('status', '==', 'pending')
+    .onSnapshot(function(snap) {
+      var newBets = snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+
+      // Start cashout timers for new bets
+      newBets.forEach(function(bet) {
+        if (!cashoutTimers[bet._id]) startCashoutTimer(bet);
+      });
+
+      // Stop timers for settled bets
+      Object.keys(cashoutTimers).forEach(function(id) {
+        if (!newBets.find(function(b) { return b._id === id; })) {
+          clearInterval(cashoutTimers[id]);
+          delete cashoutTimers[id];
+          delete cashoutValues[id];
+        }
+      });
+
+      liveBets = newBets;
+      if (document.getElementById('panel-live').style.display !== 'none') {
+        renderLiveBets();
+      }
+    }, function(err) {
+      console.error('Bets listener error:', err.message);
+    });
+}
+
+// ══════════════════════════════════════════════════════
+//  SETTLEMENT LISTENER — notifies user when bets are won/lost
+// ══════════════════════════════════════════════════════
+function listenSettlements() {
+  if (settlUnsub) settlUnsub();
+
+  settlUnsub = db.collection('bets')
+    .where('userId', '==', currentUser.id)
+    .onSnapshot(function(snap) {
+      snap.docChanges().forEach(function(change) {
+        if (change.type !== 'modified') return;
+        var b = Object.assign({ _id: change.doc.id }, change.doc.data());
+        if (notifiedBets[b._id]) return;
+        if (b.status === 'won') {
+          notifiedBets[b._id] = true;
+          showToast('🏆 ' + b.selectedTeam + ' WON! +' + b.potentialProfit + ' coins!', 'win');
+        } else if (b.status === 'lost') {
+          notifiedBets[b._id] = true;
+          showToast('😢 Lost on ' + b.selectedTeam + '. -' + b.amount + ' coins.', 'lose');
+        }
+      });
+      // Refresh history tab if open
+      if (document.getElementById('panel-hist').style.display !== 'none') {
+        loadHistory();
+      }
+    }, function(err) {
+      console.error('Settlement listener error:', err.message);
+    });
+}
+
+// ══════════════════════════════════════════════════════
+//  CASHOUT TIMER
+// ══════════════════════════════════════════════════════
+function startCashoutTimer(bet) {
+  cashoutValues[bet._id] = calcCashout(bet);
+  cashoutTimers[bet._id] = setInterval(function() {
+    cashoutValues[bet._id] = calcCashout(bet);
+    if (document.getElementById('panel-live').style.display !== 'none') {
+      updateCashoutDisplay(bet._id);
+    }
+  }, 3000);
+}
+
+function calcCashout(bet) {
+  var match  = allMatches.find(function(m) { return m._id === bet.matchId; });
+  var minPct = (match && match.cashoutMin != null) ? match.cashoutMin : 30;
+  var maxPct = (match && match.cashoutMax != null) ? match.cashoutMax : 70;
+  var pct    = minPct + Math.random() * (maxPct - minPct);
+  pct        = Math.max(minPct, Math.min(maxPct, pct));
+  var potWin = bet.potentialWin || (bet.amount + (bet.potentialProfit || 0));
+  var co     = Math.floor(potWin * pct / 100);
+  co = Math.min(co, potWin);
+  co = Math.max(0, co);
+  return { coins: co, pct: Math.round(pct), minPct: Math.round(minPct), maxPct: Math.round(maxPct), potWin: potWin };
+}
+
+function updateCashoutDisplay(betId) {
+  var co = cashoutValues[betId];
+  if (!co) return;
+  var c = document.getElementById('coCoins_' + betId);
+  var p = document.getElementById('coPct_'   + betId);
+  var b = document.getElementById('coBtn_'   + betId);
+  if (c) c.textContent = '🪙 ' + co.coins;
+  if (p) p.textContent = co.pct + '% of potential win';
+  if (b) b.textContent = '💰 CASH OUT — Get 🪙' + co.coins;
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER MATCH PILLS
+// ══════════════════════════════════════════════════════
+function renderMatchPills() {
+  var scroll = document.getElementById('matchScroll');
+  if (!allMatches.length) {
+    scroll.innerHTML = '<div style="padding:14px;color:var(--muted);font-size:12px;">No matches available yet</div>';
+    return;
+  }
+  scroll.innerHTML = '';
+  allMatches.forEach(function(m) {
+    var el = document.createElement('div');
+    el.className = 'match-pill' + (selectedMatch && selectedMatch._id === m._id ? ' active' : '');
+
+    // Support status names used by Lucky 7 admin panel: 'open', 'live', 'closed', 'completed', 'upcoming'
+    var statusClass, statusLabel;
+    switch (m.status) {
+      case 'open':
+      case 'live':
+        statusClass = 'live'; statusLabel = '🔴 LIVE'; break;
+      case 'closed':
+      case 'completed':
+        statusClass = 'completed'; statusLabel = '✅ DONE'; break;
+      default:
+        statusClass = 'upcoming'; statusLabel = '⏰ UPCOMING';
+    }
+
+    var team1 = m.team1 || 'TBA';
+    var team2 = m.team2 || 'TBA';
+    var dt    = m.datetime ? new Date(m.datetime).toLocaleString() : (m.createdAt ? 'Available' : '');
+
+    el.innerHTML = '<div class="mp-teams">' + team1 + ' vs ' + team2 + '</div>'
+      + '<div class="mp-info">' + dt + '</div>'
+      + '<div class="mp-status ' + statusClass + '">' + statusLabel + '</div>';
+
+    el.onclick = (function(match) { return function() { selectMatch(match); }; })(m);
+    scroll.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  SELECT MATCH
+// ══════════════════════════════════════════════════════
+function selectMatch(m) {
+  selectedMatch = m;
+  selectedTeam  = null;
+  renderMatchPills();
+  renderScoreboard();
+  renderOddsBanner();
+  renderTradePanel();
+}
+
+// ══════════════════════════════════════════════════════
+//  SCOREBOARD
+// ══════════════════════════════════════════════════════
+function renderScoreboard() {
+  if (!selectedMatch) return;
+  var m    = selectedMatch;
+  var wrap = document.getElementById('scoreboardWrap');
+
+  var content = m.scoreLink
+    ? '<div class="score-iframe-wrap"><iframe class="score-iframe" src="' + m.scoreLink
+        + '" sandbox="allow-scripts allow-same-origin allow-popups" loading="lazy" title="Live Score"></iframe></div>'
+        + '<div style="padding:6px 10px;font-size:10px;color:var(--muted);text-align:right">'
+        + '<a href="' + m.scoreLink + '" target="_blank" style="color:var(--blue);text-decoration:none">Open full scorecard ↗</a></div>'
+    : '<div style="padding:30px;text-align:center;color:var(--muted);font-size:13px;">No scorecard link added yet</div>';
+
+  var isLive = m.status === 'live' || m.status === 'open';
+  var isDone = m.status === 'completed' || m.status === 'closed';
+
+  var badge = isLive
+    ? '<div class="sb-badge-live">LIVE</div>'
+    : isDone
+      ? '<div style="font-size:10px;color:var(--gold);font-weight:700">🏆 ' + (m.winner || 'Completed') + '</div>'
+      : '<div style="font-size:10px;color:var(--orange);font-weight:700">⏰ UPCOMING</div>';
+
+  wrap.innerHTML = '<div class="sb-header">'
+    + '<div class="sb-match-name">' + (m.title || (m.team1 + ' vs ' + m.team2)) + '</div>'
+    + badge
+    + '</div>' + content;
+}
+
+// ══════════════════════════════════════════════════════
+//  ODDS BANNER
+//  Reads odds from multiple possible field structures:
+//  1. m.odds.team1Odds / m.odds.team2Odds   (nested)
+//  2. m.odds_team1 / m.odds_team2           (flat — Lucky 7 admin panel format)
+//  3. m.team1Odds / m.team2Odds             (flat alternative)
+// ══════════════════════════════════════════════════════
+function getTeamOdds(which) {
+  if (!selectedMatch) return 1.90;
+  var m = selectedMatch;
+  var v;
+  if (which === 'team1') {
+    v = (m.odds && m.odds.team1Odds)
+      ? m.odds.team1Odds
+      : (m.odds_team1 || m.team1Odds || m.oddsTeam1 || 1.90);
+  } else {
+    v = (m.odds && m.odds.team2Odds)
+      ? m.odds.team2Odds
+      : (m.odds_team2 || m.team2Odds || m.oddsTeam2 || 1.90);
+  }
+  return parseFloat(v) || 1.90;
+}
+
+function renderOddsBanner() {
+  var m = selectedMatch;
+  var isLive = m && (m.status === 'live' || m.status === 'open');
+
+  if (!isLive) {
+    document.getElementById('oddsBanner').style.display = 'none';
+    return;
+  }
+
+  var o1    = getTeamOdds('team1');
+  var o2    = getTeamOdds('team2');
+  var stake = parseInt((document.getElementById('stakeInput') || {}).value || '100') || 100;
+
+  document.getElementById('ot1Name').textContent = m.team1 || 'Team 1';
+  document.getElementById('ot2Name').textContent = m.team2 || 'Team 2';
+  document.getElementById('ot1Odds').textContent = o1.toFixed(2) + 'x';
+  document.getElementById('ot2Odds').textContent = o2.toFixed(2) + 'x';
+  document.getElementById('ot1Pot').textContent  = 'Win: 🪙' + Math.floor(stake * o1);
+  document.getElementById('ot2Pot').textContent  = 'Win: 🪙' + Math.floor(stake * o2);
+  document.getElementById('oddsT1').classList.toggle('selected', selectedTeam === 'team1');
+  document.getElementById('oddsT2').classList.toggle('selected', selectedTeam === 'team2');
+  document.getElementById('oddsBanner').style.display = 'grid';
+}
+
+// ══════════════════════════════════════════════════════
+//  TRADE PANEL
+// ══════════════════════════════════════════════════════
+function renderTradePanel() {
+  var inner  = document.getElementById('tradeInner');
+  var isLive = selectedMatch && (selectedMatch.status === 'live' || selectedMatch.status === 'open');
+  var isDone = selectedMatch && (selectedMatch.status === 'completed' || selectedMatch.status === 'closed');
+
+  if (!selectedMatch) {
+    inner.innerHTML = '<div class="empty-state">Select a match above</div>';
+    return;
+  }
+  if (!isLive) {
+    inner.innerHTML = '<div class="empty-state">'
+      + (isDone
+          ? '✅ Match completed' + (selectedMatch.winner ? ' — 🏆 ' + selectedMatch.winner : '')
+          : '⏰ Match not started yet. Odds will appear once the match goes live.')
+      + '</div>';
+    return;
+  }
+
+  inner.innerHTML = '<div class="bet-card">'
+    + '<div class="bc-title">⚡ Place Your Bet <span style="color:var(--muted);font-weight:400;font-size:10px;text-transform:none">(Min 100 🪙)</span></div>'
+    + '<div class="stake-label">Stake Amount</div>'
+    + '<div class="stake-row">'
+    +   '<input type="number" class="stake-input" id="stakeInput" value="100" min="100" oninput="updatePnl()">'
+    +   '<span style="font-size:12px;color:var(--muted)">🪙</span>'
+    + '</div>'
+    + '<div class="qb-row">'
+    +   '<div class="qb" onclick="addStake(100)">+100</div>'
+    +   '<div class="qb" onclick="addStake(500)">+500</div>'
+    +   '<div class="qb" onclick="addStake(1000)">+1K</div>'
+    +   '<div class="qb" onclick="addStake(5000)">+5K</div>'
+    +   '<div class="qb" onclick="setMaxStake()">MAX</div>'
+    + '</div>'
+    + '<div class="pnl-block" id="pnlBlock">'
+    +   '<div class="pnl-row"><span class="pnl-lbl">Selected Team</span><span class="pnl-val" id="selTeamLbl" style="color:var(--blue)">— Tap odds above —</span></div>'
+    +   '<div class="pnl-row"><span class="pnl-lbl">Odds</span><span class="pnl-val" id="selOddsLbl">—</span></div>'
+    +   '<div class="pnl-row"><span class="pnl-lbl">Potential Win</span><span class="pnl-val" id="potWinLbl" style="color:var(--green)">—</span></div>'
+    +   '<div class="pnl-row"><span class="pnl-lbl">If Loss</span><span class="pnl-val" id="potLossLbl" style="color:var(--red)">—</span></div>'
+    + '</div>'
+    + '<button class="place-btn" id="placeBetBtn" onclick="placeBet()" disabled>Tap a team above to select</button>'
+    + '</div>';
+}
+
+function selTeam(which) {
+  var isLive = selectedMatch && (selectedMatch.status === 'live' || selectedMatch.status === 'open');
+  if (!isLive) return;
+  selectedTeam = which;
+  renderOddsBanner();
+  updatePnl();
+  var btn = document.getElementById('placeBetBtn');
+  if (btn) {
+    btn.disabled    = false;
+    var teamName    = which === 'team1' ? selectedMatch.team1 : selectedMatch.team2;
+    btn.textContent = 'BACK ' + teamName.toUpperCase();
+  }
+}
+
+function updatePnl() {
+  if (!selectedTeam || !selectedMatch) { renderOddsBanner(); return; }
+  var stake     = parseInt((document.getElementById('stakeInput') || {}).value || '0') || 0;
+  var odds      = getTeamOdds(selectedTeam);
+  var potWin    = Math.floor(stake * odds);
+  var potProfit = potWin - stake;
+  var teamName  = selectedTeam === 'team1' ? selectedMatch.team1 : selectedMatch.team2;
+  var s = document.getElementById('selTeamLbl');
+  var o = document.getElementById('selOddsLbl');
+  var w = document.getElementById('potWinLbl');
+  var l = document.getElementById('potLossLbl');
+  if (s) s.textContent = teamName;
+  if (o) o.textContent = odds.toFixed(2) + 'x';
+  if (w) w.textContent = '+' + potProfit + ' 🪙 (Total: ' + potWin + ')';
+  if (l) l.textContent = '-' + stake + ' 🪙';
+  renderOddsBanner();
+}
+
+function addStake(amt) {
+  var inp = document.getElementById('stakeInput');
+  if (inp) { inp.value = (parseInt(inp.value) || 0) + amt; updatePnl(); }
+}
+
+function setMaxStake() {
+  var inp = document.getElementById('stakeInput');
+  if (inp) { inp.value = balance; updatePnl(); }
+}
+
+// ══════════════════════════════════════════════════════
+//  PLACE BET — uses Firestore transaction for atomic wallet deduct
+// ══════════════════════════════════════════════════════
+function placeBet() {
+  if (!selectedMatch || !selectedTeam) { showToast('Select a team first', 'info'); return; }
+  var stake = parseInt(document.getElementById('stakeInput').value) || 0;
+  if (stake < 100)       { showToast('Minimum 100 coins!',  'info'); return; }
+  if (stake > balance)   { showToast('Not enough coins!',   'lose'); return; }
+
+  var teamName  = selectedTeam === 'team1' ? selectedMatch.team1 : selectedMatch.team2;
+  var odds      = getTeamOdds(selectedTeam);
+  var potWin    = Math.floor(stake * odds);
+  var potProfit = potWin - stake;
+
+  var btn = document.getElementById('placeBetBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Placing bet...';
+
+  // Use a Firestore transaction so the wallet deduct + bet write are atomic
+  db.runTransaction(function(tx) {
+    var userRef = db.collection('users').doc(currentUser.id);
+    return tx.get(userRef).then(function(userDoc) {
+      if (!userDoc.exists) throw new Error('User not found');
+      var currentBal = typeof userDoc.data().walletBalance !== 'undefined'
+        ? (userDoc.data().walletBalance || 0)
+        : (userDoc.data().wallet || 0);
+      if (stake > currentBal) throw new Error('Insufficient balance');
+
+      // Deduct wallet — support both field names
+      var update = {};
+      if (typeof userDoc.data().walletBalance !== 'undefined') {
+        update.walletBalance = firebase.firestore.FieldValue.increment(-stake);
+      } else {
+        update.wallet = firebase.firestore.FieldValue.increment(-stake);
+      }
+      tx.update(userRef, update);
+
+      // Write bet
+      var betRef = db.collection('bets').doc();
+      tx.set(betRef, {
+        userId:          currentUser.id,
+        username:        currentUser.username || '',
+        matchId:         selectedMatch._id,
+        matchTitle:      selectedMatch.title || (selectedMatch.team1 + ' vs ' + selectedMatch.team2),
+        selectedTeam:    teamName,
+        selectedTeamKey: selectedTeam,
+        amount:          stake,
+        odds:            odds,
+        entryOdds:       odds,
+        potentialWin:    potWin,
+        potentialProfit: potProfit,
+        cashoutMin:      selectedMatch.cashoutMin  || 30,
+        cashoutMax:      selectedMatch.cashoutMax  || 70,
+        status:          'pending',
+        _notified:       false,
+        createdAt:       firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+  }).then(function() {
+    showToast('✅ Bet placed! ' + teamName + ' @' + odds.toFixed(2) + 'x | 🪙' + stake, 'win');
+    selectedTeam = null;
+    renderOddsBanner();
+    renderTradePanel();
+    switchTab('live');
+  }).catch(function(e) {
+    showToast('Error: ' + e.message, 'lose');
+    btn.disabled    = false;
+    btn.textContent = 'BACK ' + teamName.toUpperCase();
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER LIVE BETS
+// ══════════════════════════════════════════════════════
+function renderLiveBets() {
+  var list = document.getElementById('liveBetsList');
+  if (!liveBets.length) {
+    list.innerHTML = '<div class="empty-state">No active bets.<br>Go to Place Bet tab to trade.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  liveBets.forEach(function(bet) {
+    var co     = cashoutValues[bet._id] || calcCashout(bet);
+    cashoutValues[bet._id] = co;
+    var potWin = bet.potentialWin || (bet.amount + (bet.potentialProfit || 0));
+    var oddsVal = bet.odds || bet.entryOdds || 0;
+    var el = document.createElement('div');
+    el.className = 'live-bet-card';
+    el.innerHTML = ''
+      + '<div class="lbc-header">'
+      +   '<div><div class="lbc-match">' + bet.matchTitle + '</div>'
+      +   '<div class="lbc-team">🏏 ' + bet.selectedTeam + '</div></div>'
+      +   '<div class="lbc-status">ACTIVE</div>'
+      + '</div>'
+      + '<div class="lbc-grid">'
+      +   '<div class="lbc-item"><div class="lbc-val">' + oddsVal.toFixed(2) + 'x</div><div class="lbc-lbl">Odds</div></div>'
+      +   '<div class="lbc-item"><div class="lbc-val">🪙' + bet.amount + '</div><div class="lbc-lbl">Stake</div></div>'
+      +   '<div class="lbc-item"><div class="lbc-val" style="color:var(--green)">🪙' + potWin + '</div><div class="lbc-lbl">Pot. Win</div></div>'
+      + '</div>'
+      + '<div class="cashout-box">'
+      +   '<div class="co-row">'
+      +     '<div><div class="co-label">Live Cashout Value</div>'
+      +          '<div class="co-val" id="coCoins_' + bet._id + '">🪙 ' + co.coins + '</div>'
+      +          '<div class="co-pct"  id="coPct_'   + bet._id + '">' + co.pct + '% of potential win</div>'
+      +     '</div>'
+      +     '<div style="text-align:right;font-size:10px;color:var(--muted);">Max: 🪙' + potWin + '<br>Never exceeds</div>'
+      +   '</div>'
+      +   '<button class="cashout-btn" id="coBtn_' + bet._id + '" onclick="doCashout(\'' + bet._id + '\',' + bet.amount + ',' + potWin + ')">'
+      +     '💰 CASH OUT — Get 🪙' + co.coins
+      +   '</button>'
+      +   '<div class="co-warning">Cashout fluctuates. Won\'t exceed 🪙' + potWin + '</div>'
+      + '</div>';
+    list.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  DO CASHOUT
+// ══════════════════════════════════════════════════════
+function doCashout(betId, stake, potWin) {
+  var co      = cashoutValues[betId] || { coins: 0 };
+  var coCoins = Math.min(Math.max(co.coins, 0), potWin);
+
+  var btn = document.getElementById('coBtn_' + betId);
+  if (btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
+  if (cashoutTimers[betId]) { clearInterval(cashoutTimers[betId]); delete cashoutTimers[betId]; }
+
+  db.runTransaction(function(tx) {
+    var betRef  = db.collection('bets').doc(betId);
+    var userRef = db.collection('users').doc(currentUser.id);
+    return Promise.all([tx.get(betRef), tx.get(userRef)]).then(function(results) {
+      var betDoc  = results[0];
+      var userDoc = results[1];
+      if (!betDoc.exists || betDoc.data().status !== 'pending') throw new Error('Bet already settled');
+
+      tx.update(betRef, {
+        status:        'cashout',
+        settledAmount: coCoins,
+        cashoutPct:    co.pct || 0,
+        settledAt:     firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Support both wallet field names
+      var update = {};
+      if (typeof userDoc.data().walletBalance !== 'undefined') {
+        update.walletBalance = firebase.firestore.FieldValue.increment(coCoins);
+      } else {
+        update.wallet = firebase.firestore.FieldValue.increment(coCoins);
+      }
+      tx.update(userRef, update);
+    });
+  }).then(function() {
+    showToast('💰 Cashed out! Got 🪙' + coCoins, coCoins >= stake ? 'win' : 'info');
+  }).catch(function(e) {
+    showToast('Error: ' + e.message, 'lose');
+    if (btn) { btn.disabled = false; btn.textContent = '💰 CASH OUT — Get 🪙' + coCoins; }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  HISTORY
+// ══════════════════════════════════════════════════════
+function loadHistory() {
+  db.collection('bets')
+    .where('userId', '==', currentUser.id)
+    .orderBy('createdAt', 'desc')
+    .get()
+    .then(function(snap) {
+      renderHistory(snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); }));
+    })
+    .catch(function(err) {
+      // orderBy may fail if index missing — fall back without ordering
+      db.collection('bets')
+        .where('userId', '==', currentUser.id)
+        .get()
+        .then(function(snap) {
+          var bets = snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+          bets.sort(function(a, b) {
+            var ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : 0) : 0;
+            var tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : 0) : 0;
+            return tb - ta;
+          });
+          renderHistory(bets);
+        });
+    });
+}
+
+function renderHistory(bets) {
+  var list = document.getElementById('histList');
+  if (!bets.length) { list.innerHTML = '<div class="empty-state">No bet history yet</div>'; return; }
+  list.innerHTML = '';
+  bets.forEach(function(b) {
+    var ts      = b.createdAt ? b.createdAt.toDate().toLocaleString() : '—';
+    var potWin  = b.potentialWin || (b.amount + (b.potentialProfit || 0));
+    var oddsVal = b.odds || b.entryOdds || 0;
+    var statusClass, statusText, statusResult;
+    switch (b.status) {
+      case 'won':
+        statusClass  = 'sb-won'; statusText = '✅ WON';
+        statusResult = '<div class="lbc-item"><div class="lbc-val" style="color:var(--green)">+' + (b.potentialProfit||0) + ' 🪙</div><div class="lbc-lbl">Profit</div></div>';
+        break;
+      case 'lost':
+        statusClass  = 'sb-lost'; statusText = '❌ LOST';
+        statusResult = '<div class="lbc-item"><div class="lbc-val" style="color:var(--red)">-' + b.amount + ' 🪙</div><div class="lbc-lbl">Loss</div></div>';
+        break;
+      case 'cashout':
+        statusClass  = 'sb-cashout'; statusText = '💰 CASHOUT';
+        statusResult = '<div class="lbc-item"><div class="lbc-val" style="color:var(--gold)">🪙' + (b.settledAmount||0) + '</div><div class="lbc-lbl">Got Back</div></div>';
+        break;
+      default:
+        statusClass  = 'sb-active'; statusText = '⏳ ACTIVE';
+        statusResult = '<div class="lbc-item"><div class="lbc-val" style="color:var(--blue)">🪙' + potWin + '</div><div class="lbc-lbl">Pot. Win</div></div>';
+    }
+    var el = document.createElement('div'); el.className = 'hist-item';
+    el.innerHTML = ''
+      + '<div class="hi-match">' + (b.matchTitle || '') + '</div>'
+      + '<div class="hi-team">🏏 ' + (b.selectedTeam || '') + '</div>'
+      + '<div class="hi-odds">@ ' + oddsVal.toFixed(2) + 'x</div>'
+      + '<div class="hi-grid">'
+      +   '<div class="lbc-item"><div class="hi-cell-val">🪙' + b.amount + '</div><div class="hi-cell-lbl">Stake</div></div>'
+      +   '<div class="lbc-item"><div class="hi-cell-val">🪙' + potWin + '</div><div class="hi-cell-lbl">Pot. Win</div></div>'
+      +   statusResult
+      + '</div>'
+      + '<div class="hi-bottom">'
+      +   '<div class="hi-time">' + ts + '</div>'
+      +   '<div class="status-badge ' + statusClass + '">' + statusText + '</div>'
+      + '</div>';
+    list.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  SETTLEMENT NOTIFICATION
+// ══════════════════════════════════════════════════════
+function notifySettlement(match) {
+  liveBets.forEach(function(bet) {
+    if (bet.matchId !== match._id) return;
+    var won = bet.selectedTeamKey === (match.winner === match.team1 ? 'team1' : 'team2');
+    showToast(
+      won ? '🏆 ' + match.winner + ' WON! Profit added!' : '😢 ' + match.winner + ' won. Bet lost.',
+      won ? 'win' : 'lose'
+    );
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════
+function switchTab(t) {
+  ['trade', 'live', 'hist'].forEach(function(x) {
+    document.getElementById('tab-'   + x).classList.toggle('active', x === t);
+    document.getElementById('panel-' + x).style.display = x === t ? 'block' : 'none';
+  });
+  if (t === 'live')  renderLiveBets();
+  if (t === 'hist')  loadHistory();
+  if (t === 'trade') { renderTradePanel(); renderOddsBanner(); }
+}
+
+// ══════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast ' + type + ' show';
+  setTimeout(function() { t.className = 'toast'; }, 3500);
+}
+</script>
+</body>
+</html>
