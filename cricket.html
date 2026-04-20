@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cricket Trading - Lucky 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050508;--green:#00ff88;--blue:#00c8ff;
+  --red:#ff4466;--gold:#ffd700;--orange:#ff8c00;--text:#e8eaf0;
+  --muted:#7a7d8e;--border:rgba(255,255,255,0.08);--card:rgba(255,255,255,0.04);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(0,255,136,0.07),transparent 60%);pointer-events:none;z-index:0;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:rgba(5,5,8,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+.back-btn{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,0.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--text);}
+.page-title{font-size:15px;font-weight:800;background:linear-gradient(90deg,var(--green),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.balance-chip{background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:18px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--green);}
+main{position:relative;z-index:1;padding-bottom:40px;}
+/* MATCH PILLS */
+.section{padding:12px 12px 0;}
+.sec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:8px;}
+.match-scroll{display:flex;gap:9px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;}
+.match-scroll::-webkit-scrollbar{display:none;}
+.match-pill{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:10px 13px;cursor:pointer;transition:.2s;min-width:160px;}
+.match-pill.active{border-color:var(--green);background:rgba(0,255,136,0.06);}
+.match-pill:active{transform:scale(0.95);}
+.mp-teams{font-size:11px;font-weight:700;}
+.mp-info{font-size:10px;color:var(--muted);margin-top:2px;}
+.mp-status{display:inline-flex;align-items:center;gap:4px;font-size:9px;margin-top:5px;font-weight:700;}
+.mp-status.live,.mp-status.open{color:var(--green);}
+.mp-status.live::before,.mp-status.open::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.mp-status.upcoming{color:var(--orange);}
+.mp-status.closed,.mp-status.completed{color:var(--gold);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+/* SCOREBOARD */
+.scoreboard-wrap{margin:12px;border-radius:18px;overflow:hidden;border:1px solid var(--border);background:rgba(255,255,255,0.03);}
+.sb-header{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border);}
+.sb-match-name{font-size:12px;font-weight:700;}
+.sb-badge-live{background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.28);border-radius:18px;padding:3px 9px;font-size:9px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:3px;}
+.sb-badge-live::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--green);animation:blink 1s infinite;}
+.sb-card{padding:13px 14px;}
+.sb-scores{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.sb-team{flex:1;}
+.sb-team.right{text-align:right;}
+.sb-team-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.sb-score{font-size:22px;font-weight:900;color:var(--text);}
+.sb-score.batting{color:var(--green);}
+.sb-ov{font-size:10px;color:var(--blue);margin-top:2px;}
+.sb-div{font-size:11px;color:var(--muted);padding:0 6px;align-self:center;}
+.sb-chase{background:rgba(255,140,0,0.1);border:1px solid rgba(255,140,0,0.25);border-radius:8px;padding:7px 11px;font-size:11px;color:var(--orange);font-weight:600;text-align:center;margin-bottom:10px;}
+.sb-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.sb-stat{background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 5px;text-align:center;}
+.sb-stat-v{font-size:12px;font-weight:700;color:var(--blue);}
+.sb-stat-l{font-size:9px;color:var(--muted);margin-top:1px;}
+.sb-ts{font-size:9px;color:var(--muted);opacity:.6;text-align:right;padding:4px 14px 6px;border-top:1px solid var(--border);}
+.sb-empty{padding:24px 20px;text-align:center;color:var(--muted);font-size:12px;line-height:1.8;}
+/* ODDS */
+.odds-banner{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px;margin-top:0;}
+.odds-tile{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:13px 14px;text-align:center;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+.odds-tile:active{transform:scale(0.96);}
+.odds-tile.selected{border-color:var(--blue);background:rgba(0,150,255,0.1);}
+.odds-tile.selected::after{content:'OK';position:absolute;top:7px;right:9px;font-size:9px;color:var(--blue);font-weight:900;}
+.odds-tile.odds-up  {animation:fG .4s ease;}
+.odds-tile.odds-down{animation:fR .4s ease;}
+@keyframes fG{0%{background:rgba(0,255,136,0.2);}100%{background:var(--card);}}
+@keyframes fR{0%{background:rgba(255,68,102,0.2);}100%{background:var(--card);}}
+.ot-team{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ot-odds{font-size:22px;font-weight:900;color:var(--blue);}
+.ot-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.ot-pot{font-size:11px;color:var(--green);margin-top:4px;font-weight:700;}
+.ot-chg{font-size:10px;font-weight:700;margin-top:2px;}
+.ot-chg.up{color:var(--green);}
+.ot-chg.dn{color:var(--red);}
+.ot-chg.fl{color:var(--muted);}
+.odds-src{display:flex;justify-content:center;align-items:center;gap:5px;margin:-4px 12px 8px;font-size:9px;color:var(--muted);}
+.odds-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;}
+/* TABS */
+.tabs{display:flex;gap:0;margin:12px;background:rgba(255,255,255,0.04);border-radius:13px;padding:3px;}
+.tab{flex:1;padding:9px 0;text-align:center;font-size:10px;font-weight:700;cursor:pointer;border-radius:10px;transition:.2s;color:var(--muted);}
+.tab.active{background:linear-gradient(135deg,rgba(0,255,136,0.18),rgba(0,200,255,0.1));color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+/* BET PANEL */
+.bet-panel{padding:0 12px;}
+.bet-card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:15px;margin-bottom:11px;}
+.bc-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.stake-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;}
+.stake-row{display:flex;gap:7px;align-items:center;}
+.stake-input{background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-size:14px;font-weight:700;width:110px;outline:none;text-align:center;font-family:'Poppins',sans-serif;}
+.stake-input:focus{border-color:var(--green);}
+.qb-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+.qb{border:1px solid var(--border);border-radius:7px;padding:4px 10px;background:rgba(255,255,255,0.04);font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);}
+.qb:active{background:rgba(255,255,255,.1);}
+.pnl-block{margin-top:10px;background:rgba(255,255,255,0.03);border-radius:10px;padding:11px 13px;}
+.pnl-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.pnl-row:last-child{margin-bottom:0;}
+.pnl-lbl{color:var(--muted);}
+.pnl-val{font-weight:700;}
+.place-btn{width:100%;border:none;border-radius:12px;padding:14px;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;transition:.2s;background:linear-gradient(90deg,#0055aa,var(--blue));color:#000;font-family:'Poppins',sans-serif;}
+.place-btn:active{transform:scale(.97);}
+.place-btn:disabled{opacity:.4;pointer-events:none;}
+/* LIVE BET */
+.live-bet-card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:15px;margin-bottom:11px;}
+.lbc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.lbc-match{font-size:10px;color:var(--muted);}
+.lbc-team{font-size:14px;font-weight:700;margin:3px 0;}
+.lbc-status{font-size:9px;font-weight:700;color:var(--green);background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.2);border-radius:6px;padding:2px 7px;}
+.lbc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0;}
+.lbc-item{background:rgba(255,255,255,0.03);border-radius:9px;padding:8px;text-align:center;}
+.lbc-val{font-size:13px;font-weight:700;}
+.lbc-lbl{font-size:9px;color:var(--muted);margin-top:2px;}
+.co-box{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:12px;margin-top:8px;}
+.co-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.co-lbl{font-size:11px;color:var(--muted);}
+.co-val{font-size:16px;font-weight:800;color:var(--gold);}
+.co-pct{font-size:10px;color:var(--muted);}
+.co-btn{width:100%;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#006644,var(--green));color:#000;transition:.2s;font-family:'Poppins',sans-serif;margin-top:8px;}
+.co-btn:active{transform:scale(.97);}
+.co-btn:disabled{opacity:0.4;pointer-events:none;}
+.co-warn{font-size:10px;color:var(--muted);text-align:center;margin-top:5px;}
+/* HISTORY */
+.hist-sec{padding:0 12px 14px;}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 14px;margin-bottom:8px;}
+.hi-match{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.hi-team{font-size:13px;font-weight:700;margin-bottom:2px;}
+.hi-odds{font-size:11px;color:var(--blue);}
+.hi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;}
+.hi-cv{font-size:12px;font-weight:700;}
+.hi-cl{font-size:9px;color:var(--muted);margin-top:2px;}
+.hi-bot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.hi-time{font-size:10px;color:var(--muted);}
+.st-badge{font-size:11px;font-weight:700;border-radius:8px;padding:3px 10px;}
+.st-active{background:rgba(0,200,255,0.1);color:var(--blue);border:1px solid rgba(0,200,255,0.2);}
+.st-won{background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+.st-lost{background:rgba(255,68,102,0.1);color:var(--red);border:1px solid rgba(255,68,102,0.2);}
+.st-co{background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
+.empty-state{text-align:center;padding:36px 20px;color:var(--muted);font-size:13px;line-height:1.6;}
+.toast{position:fixed;top:76px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(10,10,20,.97);border:1px solid var(--border);border-radius:13px;padding:9px 18px;font-size:13px;font-weight:600;z-index:500;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{border-color:var(--green);color:var(--green);}
+.toast.lose{border-color:var(--red);color:var(--red);}
+.toast.info{border-color:var(--blue);color:var(--blue);}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="back-btn" onclick="location.href='index.html'">&larr;</div>
+  <div class="page-title">&#127936; Cricket Trading</div>
+  <div class="balance-chip" id="balChip">&#129689; 0</div>
+</header>
+<main>
+  <div class="section">
+    <div class="sec-label">Select Match</div>
+    <div class="match-scroll" id="matchScroll">
+      <div style="padding:14px;color:var(--muted);font-size:12px;">Loading matches...</div>
+    </div>
+  </div>
+
+  <!-- LIVE SCOREBOARD - rendered from score API, no iframe -->
+  <div class="scoreboard-wrap" id="scoreboardWrap">
+    <div style="padding:30px 20px;text-align:center;color:var(--muted);font-size:12px;">Select a match</div>
+  </div>
+
+  <!-- ODDS TILES -->
+  <div class="odds-banner" id="oddsBanner" style="display:none;">
+    <div class="odds-tile" id="oddsT1" onclick="selTeam('team1')">
+      <div class="ot-team" id="ot1Name">Team 1</div>
+      <div class="ot-odds" id="ot1Odds">--</div>
+      <div class="ot-sub">Tap to back</div>
+      <div class="ot-pot"  id="ot1Pot"></div>
+      <div class="ot-chg fl" id="ot1Chg">--</div>
+    </div>
+    <div class="odds-tile" id="oddsT2" onclick="selTeam('team2')">
+      <div class="ot-team" id="ot2Name">Team 2</div>
+      <div class="ot-odds" id="ot2Odds">--</div>
+      <div class="ot-sub">Tap to back</div>
+      <div class="ot-pot"  id="ot2Pot"></div>
+      <div class="ot-chg fl" id="ot2Chg">--</div>
+    </div>
+  </div>
+  <div class="odds-src" id="oddsSrc" style="display:none;">
+    <div class="odds-dot"></div>
+    <span id="oddsSrcLbl">Live odds</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-trade" onclick="switchTab('trade')">PLACE BET</div>
+    <div class="tab"        id="tab-live"  onclick="switchTab('live')">LIVE BETS</div>
+    <div class="tab"        id="tab-hist"  onclick="switchTab('hist')">HISTORY</div>
+  </div>
+  <div id="panel-trade" class="bet-panel">
+    <div id="tradeInner"><div class="empty-state">Select a live match to place a bet</div></div>
+  </div>
+  <div id="panel-live" class="bet-panel" style="display:none;">
+    <div id="liveBetsList"><div class="empty-state">No active bets.</div></div>
+  </div>
+  <div id="panel-hist" class="hist-sec" style="display:none;">
+    <div id="histList"><div class="empty-state">No bet history yet</div></div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ── Firebase ───────────────────────────────────────────
+// Guard against duplicate init (other Lucky 7 pages already call initializeApp)
+if(!firebase.apps.length){
+  firebase.initializeApp({
+    apiKey:'AIzaSyClNX5DPD55Lhj_N-UwfWtD5VssOZQZ9qw',
+    authDomain:'lucky7-64a59.firebaseapp.com',
+    projectId:'lucky7-64a59',
+    storageBucket:'lucky7-64a59.firebasestorage.app',
+    messagingSenderId:'950599334529',
+    appId:'1:950599334529:web:ca04176afa45a923532b80'
+  });
+}
+var db=firebase.firestore(), auth=firebase.auth();
+
+// ── Score API (your existing RapidAPI key) ─────────────
+// Job 1: renders the live scoreboard card
+// Job 2: score data feeds the in-play probability engine
+var SCORE_KEY  = '8facfecc65msh5f0e67649bb7612p12f979jsnbf4fb5db8343';
+var SCORE_HOST = 'cricket-api-free-data.p.rapidapi.com';
+var SCORE_POLL = 30000; // 30 s — safe for free tier
+
+// ── The Odds API — REAL bookmaker odds ─────────────────
+// Sign up FREE: https://the-odds-api.com (500 req/month)
+// Covers all cricket: IPL, T20, ODI, Test, PSL, BBL etc.
+// PASTE YOUR KEY HERE after signing up:
+var ODDS_KEY   = 'PASTE_YOUR_ODDS_API_KEY_HERE';
+var ODDS_BASE  = 'https://api.the-odds-api.com/v4';
+var ODDS_POLL  = 120000; // 2 min — 500 req/month ÷ 30 days ÷ 8h = safe
+
+// All cricket sport keys — we try each until we find the match
+var CRICKET_SPORTS = [
+  'cricket_ipl','cricket_international_t20','cricket_t20_world_cup',
+  'cricket_odi','cricket_test_match','cricket_psl','cricket_big_bash',
+  'cricket_caribbean_premier_league','cricket_t20_blast',
+  'cricket_the_hundred','cricket_asia_cup','cricket_icc_trophy'
+];
+
+// ── Auth ───────────────────────────────────────────────
+// Firebase Auth restores the session asynchronously from
+// IndexedDB on page load. The FIRST onAuthStateChanged call
+// fires BEFORE the session is restored — u is null even when
+// the user IS logged in. We must wait for it to resolve.
+var currentUser=null, balance=0, unsubUser=null, appStarted=false;
+
+// Identical pattern to dashboard.html, betting.html, profile.html — all work fine
+auth.onAuthStateChanged(function(u){
+  if(!u){ window.location.href='login.html'; return; }
+
+  if(unsubUser) unsubUser();
+  unsubUser=db.collection('users').doc(u.uid).onSnapshot(function(s){
+    if(!s.exists) return;
+    balance=parseFloat(s.data().walletBalance)||0;
+    document.getElementById('balChip').textContent='&#127922; '+balance;
+  });
+
+  if(appStarted) return;
+  appStarted=true;
+  currentUser={id:u.uid, username:u.displayName||u.email||'Player'};
+  startApp();
+});
+
+// ── State ──────────────────────────────────────────────
+var allMatches=[],selectedMatch=null,selectedTeam=null;
+var liveBets=[],cashoutTimers={},cashoutValues={},notifiedBets={};
+var liveScoreData=null, simState=null;
+var liveOdds={team1:1.90,team2:1.90,prevTeam1:1.90,prevTeam2:1.90,anchor1:1.90,anchor2:1.90,source:'admin'};
+var scorePoller=null, oddsPoller=null, noiseTimer=null;
+var marketOdds={team1:null,team2:null}; // real bookmaker odds cache
+
+function startApp(){ listenMatches(); listenBets(); listenSettlements(); }
+
+// ── Firestore listeners ────────────────────────────────
+function listenMatches(){
+  db.collection('matches').onSnapshot(function(snap){
+    allMatches=snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    allMatches.sort(function(a,b){
+      var o={live:0,open:0,upcoming:1,closed:2,completed:2};
+      var oa=o[a.status]!==undefined?o[a.status]:1,ob=o[b.status]!==undefined?o[b.status]:1;
+      if(oa!==ob) return oa-ob;
+      var ta=a.createdAt?(a.createdAt.toMillis?a.createdAt.toMillis():0):0;
+      var tb=b.createdAt?(b.createdAt.toMillis?b.createdAt.toMillis():0):0;
+      return tb-ta;
+    });
+    renderPills();
+    if(!selectedMatch&&allMatches.length>0){
+      var lv=allMatches.find(function(m){return m.status==='live'||m.status==='open';});
+      selectMatch(lv||allMatches[0]);
+    } else if(selectedMatch){
+      var upd=allMatches.find(function(m){return m._id===selectedMatch._id;});
+      if(upd){
+        selectedMatch=upd; renderScoreboard();
+        if(liveOdds.source==='admin') resetAdminOdds();
+        updatePnl();
+        if((upd.status==='completed'||upd.status==='closed')&&upd.winner) notifySettlement(upd);
+      }
+    }
+  },function(e){document.getElementById('matchScroll').innerHTML='<div style="padding:14px;color:var(--red);font-size:12px;">Error: '+e.message+'</div>';});
+}
+
+function listenBets(){
+  db.collection('bets').where('userId','==',currentUser.id).where('status','==','pending')
+    .onSnapshot(function(snap){
+      var nb=snap.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+      nb.forEach(function(b){if(!cashoutTimers[b._id])startCOTimer(b);});
+      Object.keys(cashoutTimers).forEach(function(id){
+        if(!nb.find(function(b){return b._id===id;})){clearInterval(cashoutTimers[id]);delete cashoutTimers[id];delete cashoutValues[id];}
+      });
+      liveBets=nb;
+      if(document.getElementById('panel-live').style.display!=='none') renderLiveBets();
+    });
+}
+
+function listenSettlements(){
+  db.collection('bets').where('userId','==',currentUser.id).onSnapshot(function(snap){
+    snap.docChanges().forEach(function(ch){
+      if(ch.type!=='modified') return;
+      var b=Object.assign({_id:ch.doc.id},ch.doc.data());
+      if(notifiedBets[b._id]) return;
+      if(b.status==='won') {notifiedBets[b._id]=true;showToast('Won! +'+b.potentialProfit+' coins','win');}
+      if(b.status==='lost'){notifiedBets[b._id]=true;showToast('Lost -'+b.amount+' coins','lose');}
+    });
+    if(document.getElementById('panel-hist').style.display!=='none') loadHistory();
+  });
+}
+
+// ── Odds engine ────────────────────────────────────────
+function R(v){return Math.round(v*100)/100;}
+function clamp(v){return Math.max(1.05,Math.min(15,v));}
+
+function resetAdminOdds(){
+  if(!selectedMatch) return;
+  var m=selectedMatch;
+  var o1=parseFloat(m.odds_team1||(m.odds&&m.odds.team1Odds)||1.90);
+  var o2=parseFloat(m.odds_team2||(m.odds&&m.odds.team2Odds)||1.90);
+  liveOdds.team1=liveOdds.prevTeam1=liveOdds.anchor1=R(o1);
+  liveOdds.team2=liveOdds.prevTeam2=liveOdds.anchor2=R(o2);
+  liveOdds.source='admin';
+}
+
+// Probability engine: winning team always <1.5x when dominant
+function calcOdds(d){
+  var tot=d.totalOvers||20, M=1.06, p1,p2;
+  if(d.innings===2){
+    var rn=d.target>0?Math.max(0,d.target-(d.t2score||0)):0;
+    var bl=Math.max(0,tot-(d.t2overs||0))*6;
+    var wi=10-(d.t2wkts||0);
+    if(rn<=0){p2=0.96;p1=0.04;}
+    else if(bl<=0||wi<=0){p1=0.96;p2=0.04;}
+    else{
+      var rrr=rn/(bl/6);
+      var pb=1/(1+Math.exp(0.35*(rrr-8.5)));
+      var wm=wi>=9?0.07:wi>=7?0.03:wi>=5?0:wi>=3?-0.12:wi===2?-0.22:-0.32;
+      var um=0;if(bl<=6)um=rrr<=6?0.10:-0.18;if(bl<=12)um=rrr<=7?0.06:-0.10;
+      p2=Math.max(0.04,Math.min(0.96,pb+wm+um));p1=1-p2;
+    }
+  } else {
+    var par=tot<=20?8:5.5, pr=Math.min(1,(d.t1overs||0)/tot);
+    var ra=d.crr>0?Math.max(-0.8,Math.min(0.8,(d.crr-par)/par)):0;
+    var wd=-((d.t1wkts||0)/10)*0.55;
+    var ol=Math.max(0,tot-(d.t1overs||0));
+    var db2=ol<=5?(d.crr>par+2?0.07:(d.crr<par-2?-0.08:0)):0;
+    p1=Math.max(0.18,Math.min(0.82,0.50+(ra*0.45+wd+db2)*pr));
+    p2=1-p1;
+  }
+  return{team1:clamp(R(M/Math.max(0.04,p1))),team2:clamp(R(M/Math.max(0.04,p2)))};
+}
+
+function applyToOdds(d){
+  var scoreOdds=calcOdds(d);
+  // If we have real market odds, BLEND them with score-calculated odds.
+  // Market odds = true price anchor (what bookmakers say pre-match).
+  // Score odds  = probability from current match state (in-play signal).
+  // Blend: 40% market, 60% score — gives real-world feel.
+  // Without market odds: pure score engine.
+  var o1,o2;
+  if(marketOdds.team1&&marketOdds.team2&&liveOdds.source==='market'){
+    o1=Math.round((scoreOdds.team1*0.6 + marketOdds.team1*0.4)*100)/100;
+    o2=Math.round((scoreOdds.team2*0.6 + marketOdds.team2*0.4)*100)/100;
+    o1=Math.max(1.05,Math.min(15,o1));
+    o2=Math.max(1.05,Math.min(15,o2));
+  } else {
+    o1=scoreOdds.team1; o2=scoreOdds.team2;
+    liveOdds.source='score';
+  }
+  liveOdds.prevTeam1=liveOdds.team1; liveOdds.prevTeam2=liveOdds.team2;
+  liveOdds.team1=o1; liveOdds.team2=o2;
+  liveOdds.anchor1=o1; liveOdds.anchor2=o2;
+  renderOdds(); saveOdds(o1,o2);
+}
+
+function noise(){
+  if(!selectedMatch||(selectedMatch.status!=='live'&&selectedMatch.status!=='open')) return;
+  var big=Math.random()<0.10;
+  var t1=big?(Math.random()>0.5?1:-1)*(6+Math.floor(Math.random()*9)):(Math.random()>0.5?1:-1)*Math.floor(Math.random()*4+1);
+  var t2=-Math.round(t1*0.55)+(Math.random()>0.5?1:-1);
+  if(big){var el=document.getElementById(t1<0?'oddsT1':'oddsT2');if(el){el.classList.add(t1<0?'odds-up':'odds-down');setTimeout(function(){el.classList.remove('odds-up','odds-down');},450);}}
+  var n1=Math.max(liveOdds.anchor1*0.95,Math.min(liveOdds.anchor1*1.05,R(liveOdds.team1+t1*0.01)));
+  var n2=Math.max(liveOdds.anchor2*0.95,Math.min(liveOdds.anchor2*1.05,R(liveOdds.team2+t2*0.01)));
+  n1=Math.max(1.05,n1);n2=Math.max(1.05,n2);
+  liveOdds.prevTeam1=liveOdds.team1;liveOdds.prevTeam2=liveOdds.team2;
+  liveOdds.team1=n1;liveOdds.team2=n2;
+  renderOdds(); saveOdds(n1,n2);
+}
+function schedNoise(){noiseTimer=setTimeout(function(){noise();schedNoise();},7000+Math.random()*5000);}
+
+function startPollers(){
+  stopPollers();
+  // Start real odds fetch immediately, then every 2 min
+  fetchRealOdds();
+  oddsPoller=setInterval(fetchRealOdds, ODDS_POLL);
+  // Start score fetch immediately, then every 30 s
+  fetchScore();
+  scorePoller=setInterval(fetchScore, SCORE_POLL);
+  schedNoise();
+}
+function stopPollers(){
+  if(scorePoller){clearInterval(scorePoller);scorePoller=null;}
+  if(oddsPoller){clearInterval(oddsPoller);oddsPoller=null;}
+  if(noiseTimer){clearTimeout(noiseTimer);noiseTimer=null;}
+}
+function saveOdds(o1,o2){if(!selectedMatch) return;db.collection('matches').doc(selectedMatch._id).update({odds_team1:o1,odds_team2:o2,oddsUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});}
+
+// ── The Odds API — fetch real bookmaker consensus odds ──
+// Flow:
+//   1. Try all cricket sport keys until we find a matching event
+//   2. Match by comparing home_team/away_team with admin's team1/team2
+//   3. Average the h2h decimal odds across all bookmakers (consensus)
+//   4. Set those as the market anchor — used as base price
+//   5. Score engine applies in-play movement on top of this price
+//   6. Noise adds micro-fluctuation around the current price
+//
+// If no match found (off-season / key not entered):
+//   Falls back to admin-set odds, score engine still works normally
+function fetchRealOdds(){
+  if(!selectedMatch) return;
+  if(!ODDS_KEY||ODDS_KEY==='PASTE_YOUR_ODDS_API_KEY_HERE'){
+    // No key configured — admin odds + score engine handle everything
+    return;
+  }
+  var t1=(selectedMatch.team1||'').toLowerCase();
+  var t2=(selectedMatch.team2||'').toLowerCase();
+  // Try each sport key in sequence, stop as soon as we find a match
+  tryNextSport(0,t1,t2);
+}
+
+function tryNextSport(idx,t1,t2){
+  if(idx>=CRICKET_SPORTS.length) return; // no match found in any sport
+  var sport=CRICKET_SPORTS[idx];
+  var url=ODDS_BASE+'/sports/'+sport+'/odds/?apiKey='+ODDS_KEY+'&regions=uk,au&markets=h2h&oddsFormat=decimal';
+  fetch(url)
+    .then(function(r){
+      if(r.status===401||r.status===403) throw new Error('bad key');
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(events){
+      if(!Array.isArray(events)||!events.length){tryNextSport(idx+1,t1,t2);return;}
+      // Find event matching our teams
+      var ev=null;
+      events.forEach(function(e){
+        var ht=(e.home_team||'').toLowerCase();
+        var at=(e.away_team||'').toLowerCase();
+        // Match if both team names overlap significantly (first 4 chars)
+        var t1m=t1.length>=3&&(ht.indexOf(t1.substring(0,4))!==-1||at.indexOf(t1.substring(0,4))!==-1);
+        var t2m=t2.length>=3&&(ht.indexOf(t2.substring(0,4))!==-1||at.indexOf(t2.substring(0,4))!==-1);
+        if(t1m&&t2m) ev=e;
+      });
+      if(!ev){tryNextSport(idx+1,t1,t2);return;}
+      // Parse bookmaker odds — average h2h prices across all bookmakers
+      var prices={};
+      (ev.bookmakers||[]).forEach(function(bk){
+        (bk.markets||[]).forEach(function(mkt){
+          if(mkt.key!=='h2h') return;
+          (mkt.outcomes||[]).forEach(function(out){
+            var nm=(out.name||'').toLowerCase();
+            var price=parseFloat(out.price)||0;
+            if(price<=1) return;
+            if(!prices[nm]) prices[nm]=[];
+            prices[nm].push(price);
+          });
+        });
+      });
+      // Average prices per team name
+      function avg(arr){return arr.reduce(function(a,b){return a+b;},0)/arr.length;}
+      // Map event team names to our team1/team2
+      var ht=(ev.home_team||'').toLowerCase();
+      var at=(ev.away_team||'').toLowerCase();
+      var htPrices=prices[ht]||[];
+      var atPrices=prices[at]||[];
+      if(!htPrices.length||!atPrices.length) return;
+      var htAvg=avg(htPrices), atAvg=avg(atPrices);
+      // Determine which is team1 / team2
+      var o1,o2;
+      var t1isHome=t1.indexOf(ht.substring(0,4))!==-1||ht.indexOf(t1.substring(0,4))!==-1;
+      if(t1isHome){o1=htAvg;o2=atAvg;}else{o1=atAvg;o2=htAvg;}
+      o1=Math.round(o1*100)/100;
+      o2=Math.round(o2*100)/100;
+      // Store market odds
+      marketOdds.team1=o1; marketOdds.team2=o2;
+      // Set as anchor — this is the real market price
+      liveOdds.anchor1=o1; liveOdds.anchor2=o2;
+      liveOdds.prevTeam1=liveOdds.team1; liveOdds.prevTeam2=liveOdds.team2;
+      liveOdds.team1=o1; liveOdds.team2=o2;
+      liveOdds.source='market';
+      renderOdds();
+      saveOdds(o1,o2);
+      setOddsSrc('Real market odds (' + (ev.bookmakers||[]).length + ' bookmakers)');
+      console.log('Odds API: '+ev.home_team+' vs '+ev.away_team+' | '+o1+'x / '+o2+'x');
+    })
+    .catch(function(e){
+      // This sport had no data or errored — try next
+      if(e.message!=='bad key') tryNextSport(idx+1,t1,t2);
+    });
+}
+
+// ── Score API fetch ────────────────────────────────────
+// This single API now powers BOTH the scoreboard display
+// AND the in-play odds movement on top of market odds.
+function fetchScore(){
+  if(!selectedMatch||(selectedMatch.status!=='live'&&selectedMatch.status!=='open')) return;
+  var apiId=selectedMatch.apiMatchId||selectedMatch.cricApiId||null;
+  var url=apiId
+    ?'https://'+SCORE_HOST+'/cricket-scorecard?matchid='+encodeURIComponent(apiId)
+    :'https://'+SCORE_HOST+'/live-scores';
+  fetch(url,{method:'GET',headers:{'Content-Type':'application/json','x-rapidapi-host':SCORE_HOST,'x-rapidapi-key':SCORE_KEY}})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(json){
+      var data=parseScore(json,selectedMatch.team1||'',selectedMatch.team2||'',apiId);
+      if(!data){runSim();return;}
+      liveScoreData=data;
+      renderScoreboard();            // render live score card
+      applyToOdds(data);             // in-play odds from score data
+      setTs('Score updated: '+new Date().toLocaleTimeString());
+      // Only update source label if market odds haven't taken over
+      if(liveOdds.source!=='market') setOddsSrc('Live odds from score data');
+    }).catch(function(){runSim();});
+}
+
+// Parse /live-scores array of strings
+function parseScore(json,t1,t2,apiId){
+  if(!json) return null;
+  if(json.innings||json.scorecard) return parseSC(json);
+  var arr=Array.isArray(json)?json:(json.data||json.results||json.matches||[]);
+  if(!arr.length) return null;
+  var t1s=t1.substring(0,3).toLowerCase(),t2s=t2.substring(0,3).toLowerCase();
+  var entry=null;
+  if(apiId){entry=arr[0];}
+  else{arr.forEach(function(x){var s=(typeof x==='string'?x:(x.score||x.scoreStr||'')).toLowerCase();if(s.indexOf(t1s)!==-1||s.indexOf(t2s)!==-1)entry=x;});}
+  if(!entry) return null;
+  return parseLive(typeof entry==='string'?entry:(entry.score||entry.scoreStr||''));
+}
+
+// "IND196-7 (20 Ovs) AUS9-2 (2.3 Ovs) Australia need 188 runs"
+function parseLive(str){
+  if(!str) return null;
+  var r={innings:1,t1score:0,t1wkts:0,t1overs:0,t2score:0,t2wkts:0,t2overs:0,crr:0,rrr:0,target:0,totalOvers:20};
+  var oMs=str.match(/\((\d+)\s*Ovs?\)/gi)||[];
+  var maxO=0;oMs.forEach(function(o){var n=parseFloat(o.replace(/[^0-9.]/g,''));if(n>maxO)maxO=n;});
+  if(maxO>40)r.totalOvers=50;else if(maxO>20)r.totalOvers=maxO;
+  var re=/[A-Z]{2,5}(\d+)[\-\/](\d+)\s*\(([0-9.]+)\s*Ovs?\)/gi,m,bl=[];
+  while((m=re.exec(str))!==null)bl.push({runs:parseInt(m[1]),wkts:parseInt(m[2]),overs:parseFloat(m[3])});
+  if(bl[0]){r.t1score=bl[0].runs;r.t1wkts=bl[0].wkts;r.t1overs=bl[0].overs;}
+  if(bl[1]){r.t2score=bl[1].runs;r.t2wkts=bl[1].wkts;r.t2overs=bl[1].overs;r.innings=2;}
+  var nm=str.match(/need\s+(\d+)\s*(?:runs?)?(?:\s+from\s+(\d+)\s*balls?)?/i);
+  if(nm){r.innings=2;var rn=parseInt(nm[1]);r.target=r.t2score+rn;var bl2=nm[2]?parseInt(nm[2]):(r.totalOvers-r.t2overs)*6;if(bl2>0)r.rrr=R(rn/(bl2/6));}
+  if(r.innings===2&&r.t2overs>0)r.crr=R(r.t2score/r.t2overs);else if(r.t1overs>0)r.crr=R(r.t1score/r.t1overs);
+  return r;
+}
+
+function parseSC(json){
+  try{
+    var inn=json.innings||json.scorecard||[];if(!inn.length)return null;
+    var r={innings:inn.length,t1score:0,t1wkts:0,t1overs:0,t2score:0,t2wkts:0,t2overs:0,crr:0,rrr:0,target:0,totalOvers:20};
+    var i1=inn[0];r.t1score=parseInt(i1.score||i1.runs||0);r.t1wkts=parseInt(i1.wickets||0);r.t1overs=parseFloat(i1.overs||0);
+    if(inn.length>=2){
+      var i2=inn[1];r.t2score=parseInt(i2.score||i2.runs||0);r.t2wkts=parseInt(i2.wickets||0);r.t2overs=parseFloat(i2.overs||0);
+      r.target=r.t1score+1;var tot=parseFloat((json.matchHeader&&json.matchHeader.totalOvers)||20);r.totalOvers=tot;
+      var bl=Math.max(0,(tot-r.t2overs)*6),rn=r.target-r.t2score;if(bl>0)r.rrr=R(rn/(bl/6));if(r.t2overs>0)r.crr=R(r.t2score/r.t2overs);
+    }else{if(r.t1overs>0)r.crr=R(r.t1score/r.t1overs);}
+    return r;
+  }catch(e){return null;}
+}
+
+// ── Simulated fallback ─────────────────────────────────
+function runSim(){
+  if(!selectedMatch||(selectedMatch.status!=='live'&&selectedMatch.status!=='open')) return;
+  if(!simState)simState={innings:1,t1score:0,t1wkts:0,t1overs:0,t2score:0,t2wkts:0,t2overs:0,target:0,crr:0,rrr:0,totalOvers:20};
+  var s=simState;
+  if(s.innings===1){
+    for(var i=0;i<3;i++){
+      if(s.t1overs>=s.totalOvers||s.t1wkts>=10)break;
+      var r=Math.random()<0.15?0:Math.random()<0.08?6:Math.random()<0.15?4:Math.floor(Math.random()*3)+1;
+      s.t1score+=r;if(Math.random()<0.048&&s.t1wkts<9)s.t1wkts++;
+      s.t1overs=Math.min(s.totalOvers,parseFloat((s.t1overs+1/6).toFixed(2)));
+    }
+    s.crr=s.t1overs>0?parseFloat((s.t1score/s.t1overs).toFixed(2)):0;
+    if(s.t1overs>=s.totalOvers||s.t1wkts>=10){s.innings=2;s.target=s.t1score+1;s.t2overs=0;s.t2score=0;s.t2wkts=0;s.crr=0;s.rrr=parseFloat((s.target/s.totalOvers).toFixed(2));}
+  }else{
+    for(var j=0;j<3;j++){
+      var rn=s.target-s.t2score,bl=Math.max(0,(s.totalOvers-s.t2overs)*6);
+      if(rn<=0||bl<=0||s.t2wkts>=10)break;
+      var r2=Math.random()<0.15?0:Math.random()<0.10?6:Math.random()<0.18?4:Math.floor(Math.random()*3)+1;
+      s.t2score+=r2;if(Math.random()<0.048&&s.t2wkts<9)s.t2wkts++;
+      s.t2overs=Math.min(s.totalOvers,parseFloat((s.t2overs+1/6).toFixed(2)));
+    }
+    var bl3=Math.max(0,(s.totalOvers-s.t2overs)*6),rn3=Math.max(0,s.target-s.t2score);
+    s.crr=s.t2overs>0?parseFloat((s.t2score/s.t2overs).toFixed(2)):0;
+    s.rrr=bl3>0?parseFloat((rn3/(bl3/6)).toFixed(2)):0;
+  }
+  liveScoreData=s;
+  renderScoreboard(); applyToOdds(s); liveOdds.source='simulated';
+  if(liveOdds.source!=='market') setOddsSrc('Simulated market');
+  setTs('Simulated: '+new Date().toLocaleTimeString());
+}
+
+function setTs(t){var e=document.getElementById('sb-ts');if(e)e.textContent=t;}
+function setOddsSrc(t){var e=document.getElementById('oddsSrcLbl');if(e)e.textContent=t;}
+
+// ── SCOREBOARD RENDERER ────────────────────────────────
+// Builds a rich live score card from parsed API data.
+// No iframe needed — the API data IS the scoreboard.
+function renderScoreboard(){
+  if(!selectedMatch) return;
+  var m=selectedMatch, wrap=document.getElementById('scoreboardWrap');
+  var isL=m.status==='live'||m.status==='open', isDone=m.status==='completed'||m.status==='closed';
+  var badge=isL?'<div class="sb-badge-live">LIVE</div>'
+    :isDone?'<div style="font-size:10px;color:var(--gold);font-weight:700">Won: '+(m.winner||'Done')+'</div>'
+    :'<div style="font-size:10px;color:var(--orange);font-weight:700">Upcoming</div>';
+  var hdr='<div class="sb-header"><div class="sb-match-name">'+m.team1+' vs '+m.team2+'</div>'+badge+'</div>';
+
+  if(liveScoreData&&isL){wrap.innerHTML=hdr+buildCard(liveScoreData,m);return;}
+  var body=isL?'<div class="sb-empty">Fetching live score...<br><small>Updates every 30 s</small></div>'
+    :isDone?'<div class="sb-empty">Match complete'+(m.winner?' - '+m.winner+' won':'')+' </div>'
+    :'<div class="sb-empty">Match not started yet</div>';
+  wrap.innerHTML=hdr+body;
+}
+
+function buildCard(d,m){
+  var t1=m.team1||'T1',t2=m.team2||'T2';
+  // 1st innings block
+  var t1cls=d.innings===1?' batting':'';
+  var c1='<div class="sb-team"><div class="sb-team-lbl">'+t1+'</div><div class="sb-score'+t1cls+'">'+d.t1score+'/'+d.t1wkts+'</div><div class="sb-ov">('+d.t1overs+' ov)</div></div>';
+  // 2nd innings block
+  var c2='';
+  if(d.innings===2){c2='<div class="sb-div">|</div><div class="sb-team right"><div class="sb-team-lbl">'+t2+'</div><div class="sb-score batting">'+d.t2score+'/'+d.t2wkts+'</div><div class="sb-ov">('+d.t2overs+' ov)</div></div>';}
+  // Chase message
+  var chase='';
+  if(d.innings===2&&d.target>0){
+    var rl=Math.max(0,d.target-d.t2score),ol=Math.max(0,parseFloat((d.totalOvers-d.t2overs).toFixed(1))),wi=10-d.t2wkts;
+    chase=rl>0?'<div class="sb-chase">'+t2+' need <strong>'+rl+'</strong> from <strong>'+ol+'</strong> ov ('+wi+' wkts)</div>'
+      :'<div class="sb-chase" style="color:var(--green);border-color:rgba(0,255,136,.3)">'+t2+' won!</div>';
+  }
+  // Stats row
+  var crr=d.crr>0?d.crr.toFixed(2):'--',rrr=d.rrr>0?d.rrr.toFixed(2):'--';
+  var wk=d.innings===2?d.t2wkts:d.t1wkts, ov=d.innings===2?d.t2overs:d.t1overs;
+  var stats='<div class="sb-stats">'
+    +'<div class="sb-stat"><div class="sb-stat-v">'+crr+'</div><div class="sb-stat-l">CRR</div></div>'
+    +'<div class="sb-stat"><div class="sb-stat-v" style="color:var(--orange)">'+rrr+'</div><div class="sb-stat-l">RRR</div></div>'
+    +'<div class="sb-stat"><div class="sb-stat-v" style="color:var(--red)">'+wk+'</div><div class="sb-stat-l">Wkts</div></div>'
+    +'<div class="sb-stat"><div class="sb-stat-v">'+ov+'</div><div class="sb-stat-l">Overs</div></div></div>';
+  return '<div class="sb-card"><div class="sb-scores">'+c1+c2+'</div>'+chase+stats+'</div>'+'<div class="sb-ts" id="sb-ts">Loading...</div>';
+}
+
+// ── Match pills ────────────────────────────────────────
+function renderPills(){
+  var sc=document.getElementById('matchScroll');
+  if(!allMatches.length){sc.innerHTML='<div style="padding:14px;color:var(--muted);font-size:12px;">No matches yet</div>';return;}
+  sc.innerHTML='';
+  allMatches.forEach(function(m){
+    var el=document.createElement('div');
+    el.className='match-pill'+(selectedMatch&&selectedMatch._id===m._id?' active':'');
+    var cls='upcoming',lbl='Upcoming';
+    if(m.status==='live'||m.status==='open'){cls='live';lbl='&#128308; LIVE';}
+    else if(m.status==='closed'||m.status==='completed'){cls='completed';lbl='Done';}
+    el.innerHTML='<div class="mp-teams">'+(m.team1||'TBA')+' vs '+(m.team2||'TBA')+'</div>'
+      +'<div class="mp-info">'+(m.datetime?new Date(m.datetime).toLocaleString():'')+'</div>'
+      +'<div class="mp-status '+cls+'">'+lbl+'</div>';
+    el.onclick=(function(mt){return function(){selectMatch(mt);};})(m);
+    sc.appendChild(el);
+  });
+}
+
+// ── Select match ───────────────────────────────────────
+function selectMatch(m){
+  selectedMatch=m;selectedTeam=null;liveScoreData=null;simState=null;
+  marketOdds={team1:null,team2:null};
+  stopPollers();resetAdminOdds();
+  renderPills();renderScoreboard();renderOdds();renderTrade();
+  var isL=m.status==='live'||m.status==='open';
+  document.getElementById('oddsSrc').style.display=isL?'flex':'none';
+  if(isL)startPollers();
+}
+
+// ── Odds banner ────────────────────────────────────────
+function getOdds(w){return w==='team1'?liveOdds.team1:liveOdds.team2;}
+function renderOdds(){
+  var m=selectedMatch,isL=m&&(m.status==='live'||m.status==='open');
+  if(!isL){document.getElementById('oddsBanner').style.display='none';return;}
+  var o1=liveOdds.team1,o2=liveOdds.team2,p1=liveOdds.prevTeam1,p2=liveOdds.prevTeam2;
+  var stk=parseInt((document.getElementById('stakeInput')||{}).value||'100')||100;
+  document.getElementById('ot1Name').textContent=m.team1||'T1';
+  document.getElementById('ot2Name').textContent=m.team2||'T2';
+  document.getElementById('ot1Odds').textContent=o1.toFixed(2)+'x';
+  document.getElementById('ot2Odds').textContent=o2.toFixed(2)+'x';
+  document.getElementById('ot1Pot').textContent='Win: &#129689;'+Math.floor(stk*o1);
+  document.getElementById('ot2Pot').textContent='Win: &#129689;'+Math.floor(stk*o2);
+  function chg(id,c,p){var e=document.getElementById(id);if(!e)return;var d=R(c-p);
+    if(d>0.005){e.textContent='&#9650; +'+d.toFixed(2);e.className='ot-chg up';}
+    else if(d<-0.005){e.textContent='&#9660; '+d.toFixed(2);e.className='ot-chg dn';}
+    else{e.textContent='--';e.className='ot-chg fl';}
+  }
+  chg('ot1Chg',o1,p1);chg('ot2Chg',o2,p2);
+  document.getElementById('oddsT1').classList.toggle('selected',selectedTeam==='team1');
+  document.getElementById('oddsT2').classList.toggle('selected',selectedTeam==='team2');
+  document.getElementById('oddsBanner').style.display='grid';
+}
+
+// ── Trade panel ────────────────────────────────────────
+function renderTrade(){
+  var inner=document.getElementById('tradeInner');
+  var isL=selectedMatch&&(selectedMatch.status==='live'||selectedMatch.status==='open');
+  var isDone=selectedMatch&&(selectedMatch.status==='completed'||selectedMatch.status==='closed');
+  if(!selectedMatch){inner.innerHTML='<div class="empty-state">Select a match above</div>';return;}
+  if(!isL){inner.innerHTML='<div class="empty-state">'+(isDone?'Match complete'+(selectedMatch.winner?' - '+selectedMatch.winner+' won':''):'Match not live yet')+'</div>';return;}
+  inner.innerHTML='<div class="bet-card">'
+    +'<div class="bc-title">Place Bet <span style="color:var(--muted);font-weight:400;font-size:10px;text-transform:none">(Min 100)</span></div>'
+    +'<div class="stake-label">Stake</div>'
+    +'<div class="stake-row"><input type="number" class="stake-input" id="stakeInput" value="100" min="100" oninput="updatePnl()"><span style="font-size:12px;color:var(--muted)">&#129689;</span></div>'
+    +'<div class="qb-row"><div class="qb" onclick="addS(100)">+100</div><div class="qb" onclick="addS(500)">+500</div><div class="qb" onclick="addS(1000)">+1K</div><div class="qb" onclick="addS(5000)">+5K</div><div class="qb" onclick="maxS()">MAX</div></div>'
+    +'<div class="pnl-block"><div class="pnl-row"><span class="pnl-lbl">Team</span><span class="pnl-val" id="pnlTeam" style="color:var(--blue)">Tap odds above</span></div>'
+    +'<div class="pnl-row"><span class="pnl-lbl">Odds</span><span class="pnl-val" id="pnlOdds">--</span></div>'
+    +'<div class="pnl-row"><span class="pnl-lbl">Potential Win</span><span class="pnl-val" id="pnlWin" style="color:var(--green)">--</span></div>'
+    +'<div class="pnl-row"><span class="pnl-lbl">If Loss</span><span class="pnl-val" id="pnlLoss" style="color:var(--red)">--</span></div></div>'
+    +'<button class="place-btn" id="placeBetBtn" onclick="placeBet()" disabled>Tap a team above</button></div>';
+}
+
+function selTeam(w){
+  if(!selectedMatch||(selectedMatch.status!=='live'&&selectedMatch.status!=='open'))return;
+  selectedTeam=w;renderOdds();updatePnl();
+  var btn=document.getElementById('placeBetBtn');
+  if(btn){btn.disabled=false;btn.textContent='BACK '+(w==='team1'?selectedMatch.team1:selectedMatch.team2).toUpperCase();}
+}
+function updatePnl(){
+  if(!selectedTeam||!selectedMatch){renderOdds();return;}
+  var stk=parseInt((document.getElementById('stakeInput')||{}).value||'0')||0;
+  var odds=getOdds(selectedTeam),pw=Math.floor(stk*odds),pp=pw-stk;
+  var nm=selectedTeam==='team1'?selectedMatch.team1:selectedMatch.team2;
+  var t=document.getElementById('pnlTeam'),o=document.getElementById('pnlOdds'),w=document.getElementById('pnlWin'),l=document.getElementById('pnlLoss');
+  if(t)t.textContent=nm;if(o)o.textContent=odds.toFixed(2)+'x';
+  if(w)w.textContent='+'+pp+' &#129689; (Total: '+pw+')';if(l)l.textContent='-'+stk+' &#129689;';
+  renderOdds();
+}
+function addS(a){var i=document.getElementById('stakeInput');if(i){i.value=(parseInt(i.value)||0)+a;updatePnl();}}
+function maxS(){var i=document.getElementById('stakeInput');if(i){i.value=balance;updatePnl();}}
+
+// ── Place bet ──────────────────────────────────────────
+function placeBet(){
+  if(!selectedMatch||!selectedTeam){showToast('Select a team first','info');return;}
+  var stk=parseInt(document.getElementById('stakeInput').value)||0;
+  if(stk<100){showToast('Min 100 coins','info');return;}
+  if(stk>balance){showToast('Not enough coins','lose');return;}
+  var tn=selectedTeam==='team1'?selectedMatch.team1:selectedMatch.team2;
+  var odds=getOdds(selectedTeam),pw=Math.floor(stk*odds),pp=pw-stk;
+  var btn=document.getElementById('placeBetBtn');btn.disabled=true;btn.textContent='Placing...';
+  db.runTransaction(function(tx){
+    var ur=db.collection('users').doc(currentUser.id);
+    return tx.get(ur).then(function(ud){
+      if(!ud.exists)throw new Error('User not found');
+      var bal=parseFloat(ud.data().walletBalance)||0;
+      if(stk>bal)throw new Error('Insufficient balance');
+      tx.update(ur,{walletBalance:firebase.firestore.FieldValue.increment(-stk)});
+      var br=db.collection('bets').doc();
+      tx.set(br,{userId:currentUser.id,username:currentUser.username||'',matchId:selectedMatch._id,
+        matchTitle:selectedMatch.team1+' vs '+selectedMatch.team2,selectedTeam:tn,selectedTeamKey:selectedTeam,
+        amount:stk,odds:odds,entryOdds:odds,potentialWin:pw,potentialProfit:pp,
+        cashoutMin:selectedMatch.cashoutMin||30,cashoutMax:selectedMatch.cashoutMax||70,
+        status:'pending',_notified:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    });
+  }).then(function(){
+    showToast('Bet placed! '+tn+' @'+odds.toFixed(2)+'x','win');
+    selectedTeam=null;renderOdds();renderTrade();switchTab('live');
+  }).catch(function(e){showToast('Error: '+e.message,'lose');btn.disabled=false;btn.textContent='BACK '+tn.toUpperCase();});
+}
+
+// ── Cashout ────────────────────────────────────────────
+function startCOTimer(bet){
+  cashoutValues[bet._id]=calcCO(bet);
+  cashoutTimers[bet._id]=setInterval(function(){
+    cashoutValues[bet._id]=calcCO(bet);
+    if(document.getElementById('panel-live').style.display!=='none')updCO(bet._id);
+  },3000);
+}
+function calcCO(bet){
+  var m=allMatches.find(function(x){return x._id===bet.matchId;});
+  var mn=(m&&m.cashoutMin!=null)?m.cashoutMin:30,mx=(m&&m.cashoutMax!=null)?m.cashoutMax:70;
+  var pct=mn+Math.random()*(mx-mn),pw=bet.potentialWin||(bet.amount+(bet.potentialProfit||0));
+  return{coins:Math.min(Math.max(Math.floor(pw*pct/100),0),pw),pct:Math.round(pct)};
+}
+function updCO(id){var co=cashoutValues[id];if(!co)return;var c=document.getElementById('coC_'+id),p=document.getElementById('coP_'+id),b=document.getElementById('coB_'+id);if(c)c.textContent='&#129689; '+co.coins;if(p)p.textContent=co.pct+'%';if(b)b.textContent='Cash Out &#129689;'+co.coins;}
+function doCO(bid,stk,pw){
+  var co=cashoutValues[bid]||{coins:0},c=Math.min(Math.max(co.coins,0),pw);
+  var btn=document.getElementById('coB_'+bid);if(btn){btn.disabled=true;btn.textContent='...';}
+  if(cashoutTimers[bid]){clearInterval(cashoutTimers[bid]);delete cashoutTimers[bid];}
+  db.runTransaction(function(tx){
+    var br=db.collection('bets').doc(bid),ur=db.collection('users').doc(currentUser.id);
+    return Promise.all([tx.get(br),tx.get(ur)]).then(function(res){
+      if(!res[0].exists||res[0].data().status!=='pending')throw new Error('Already settled');
+      tx.update(br,{status:'cashout',settledAmount:c,cashoutPct:co.pct||0,settledAt:firebase.firestore.FieldValue.serverTimestamp()});
+      tx.update(ur,{walletBalance:firebase.firestore.FieldValue.increment(c)});
+    });
+  }).then(function(){showToast('Cashed out &#129689;'+c,c>=stk?'win':'info');})
+  .catch(function(e){showToast('Error: '+e.message,'lose');if(btn){btn.disabled=false;btn.textContent='Cash Out &#129689;'+c;}});
+}
+
+// ── Live bets ──────────────────────────────────────────
+function renderLiveBets(){
+  var list=document.getElementById('liveBetsList');
+  if(!liveBets.length){list.innerHTML='<div class="empty-state">No active bets.</div>';return;}
+  list.innerHTML='';
+  liveBets.forEach(function(bet){
+    var co=cashoutValues[bet._id]||calcCO(bet);cashoutValues[bet._id]=co;
+    var pw=bet.potentialWin||(bet.amount+(bet.potentialProfit||0));
+    var el=document.createElement('div');el.className='live-bet-card';
+    el.innerHTML='<div class="lbc-header"><div><div class="lbc-match">'+bet.matchTitle+'</div><div class="lbc-team">'+bet.selectedTeam+'</div></div><div class="lbc-status">ACTIVE</div></div>'
+      +'<div class="lbc-grid"><div class="lbc-item"><div class="lbc-val">'+bet.entryOdds.toFixed(2)+'x</div><div class="lbc-lbl">Odds</div></div>'
+      +'<div class="lbc-item"><div class="lbc-val">&#129689;'+bet.amount+'</div><div class="lbc-lbl">Stake</div></div>'
+      +'<div class="lbc-item"><div class="lbc-val" style="color:var(--green)">&#129689;'+pw+'</div><div class="lbc-lbl">Pot. Win</div></div></div>'
+      +'<div class="co-box"><div class="co-row"><div><div class="co-lbl">Cashout Value</div><div class="co-val" id="coC_'+bet._id+'">&#129689; '+co.coins+'</div><div class="co-pct" id="coP_'+bet._id+'">'+co.pct+'%</div></div>'
+      +'<div style="font-size:10px;color:var(--muted)">Max:&#129689;'+pw+'</div></div>'
+      +'<button class="co-btn" id="coB_'+bet._id+'" onclick="doCO(\''+bet._id+'\','+bet.amount+','+pw+')">Cash Out &#129689;'+co.coins+'</button>'
+      +'<div class="co-warn">Never exceeds &#129689;'+pw+'</div></div>';
+    list.appendChild(el);
+  });
+}
+
+// ── History ────────────────────────────────────────────
+function loadHistory(){
+  db.collection('bets').where('userId','==',currentUser.id).orderBy('createdAt','desc').get()
+  .then(function(s){renderHist(s.docs.map(function(d){return Object.assign({_id:d.id},d.data());}));})
+  .catch(function(){db.collection('bets').where('userId','==',currentUser.id).get().then(function(s){
+    var b=s.docs.map(function(d){return Object.assign({_id:d.id},d.data());});
+    b.sort(function(a,c){var ta=a.createdAt?(a.createdAt.toMillis?a.createdAt.toMillis():0):0,tb=c.createdAt?(c.createdAt.toMillis?c.createdAt.toMillis():0):0;return tb-ta;});
+    renderHist(b);
+  });});
+}
+function renderHist(bets){
+  var list=document.getElementById('histList');
+  if(!bets.length){list.innerHTML='<div class="empty-state">No history yet</div>';return;}
+  list.innerHTML='';
+  bets.forEach(function(b){
+    var ts=b.createdAt?b.createdAt.toDate().toLocaleString():'--';
+    var pw=b.potentialWin||(b.amount+(b.potentialProfit||0)),sc,st,sr;
+    switch(b.status){
+      case 'won':sc='st-won';st='Won';sr='<div class="lbc-item"><div class="hi-cv" style="color:var(--green)">+'+(b.potentialProfit||0)+'</div><div class="hi-cl">Profit</div></div>';break;
+      case 'lost':sc='st-lost';st='Lost';sr='<div class="lbc-item"><div class="hi-cv" style="color:var(--red)">-'+b.amount+'</div><div class="hi-cl">Loss</div></div>';break;
+      case 'cashout':sc='st-co';st='Cashout';sr='<div class="lbc-item"><div class="hi-cv" style="color:var(--gold)">&#129689;'+(b.settledAmount||0)+'</div><div class="hi-cl">Got</div></div>';break;
+      default:sc='st-active';st='Active';sr='<div class="lbc-item"><div class="hi-cv" style="color:var(--blue)">&#129689;'+pw+'</div><div class="hi-cl">Pot.Win</div></div>';
+    }
+    var el=document.createElement('div');el.className='hist-item';
+    el.innerHTML='<div class="hi-match">'+(b.matchTitle||'')+'</div><div class="hi-team">'+(b.selectedTeam||'')+'</div><div class="hi-odds">@'+(b.entryOdds||b.odds||0).toFixed(2)+'x</div>'
+      +'<div class="hi-grid"><div class="lbc-item"><div class="hi-cv">&#129689;'+b.amount+'</div><div class="hi-cl">Stake</div></div><div class="lbc-item"><div class="hi-cv">&#129689;'+pw+'</div><div class="hi-cl">Pot.Win</div></div>'+sr+'</div>'
+      +'<div class="hi-bot"><div class="hi-time">'+ts+'</div><div class="st-badge '+sc+'">'+st+'</div></div>';
+    list.appendChild(el);
+  });
+}
+
+function notifySettlement(m){liveBets.forEach(function(b){if(b.matchId!==m._id)return;var w=b.selectedTeamKey===(m.winner===m.team1?'team1':'team2');showToast(w?m.winner+' won! Profit added':'Lost. '+m.winner+' won.',w?'win':'lose');});}
+
+function switchTab(t){['trade','live','hist'].forEach(function(x){document.getElementById('tab-'+x).classList.toggle('active',x===t);document.getElementById('panel-'+x).style.display=x===t?'block':'none';});if(t==='live')renderLiveBets();if(t==='hist')loadHistory();if(t==='trade'){renderTrade();renderOdds();}}
+
+function showToast(msg,type){var t=document.getElementById('toast');t.innerHTML=msg;t.className='toast '+type+' show';setTimeout(function(){t.className='toast';},3500);}
+</script>
+</body>
+</html>
